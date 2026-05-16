@@ -1,379 +1,429 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { motion } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
-  ArrowRight, 
-  Globe, 
-  Shield, 
-  Users, 
-  Cpu, 
-  Zap, 
-  Map as MapIcon, 
-  MessageSquare, 
-  Mail, 
-  Phone,
-  Droplets,
-  Tractor
+  BookOpen, 
+  Menu,
+  X,
+  Download,
+  Users,
+  Target,
+  FileText,
+  ChevronRight,
+  WifiOff,
+  Cpu,
+  Shield,
+  ArrowRight,
+  Grid,
+  Home,
+  Info,
+  Mail,
+  Briefcase,
+  GraduationCap,
+  Microscope,
+  MessageSquare,
+  Building,
+  MonitorSmartphone,
+  ExternalLink
 } from "lucide-react";
-import type { ReactNode } from "react";
+
+type View = 
+  | "tuis" 
+  | "oor-ons" 
+  | "kontak" 
+  | "gebruiksgevalle" 
+  | "tuisskool" 
+  | "skole" 
+  | "korporatief" 
+  | "ed-tegnologie" 
+  | "opleiding" 
+  | "navorsing" 
+  | "gemeenskap"
+  | "witpapiere";
 
 export default function App() {
+  const [currentView, setCurrentView] = useState<View>("tuis");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Close menu when navigating
+  const navigate = (view: View) => {
+    setCurrentView(view);
+    setIsSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div id="app-root" className="min-h-screen bg-bg text-ink selection:bg-accent selection:text-bg overflow-x-hidden">
-      {/* Navigation */}
-      <nav id="main-nav" className="container max-w-6xl mx-auto px-8 py-6 flex justify-between items-center border-b border-border-accent z-50 sticky top-0 bg-bg/80 backdrop-blur-md">
-        <div id="logo" className="font-serif text-2xl font-bold tracking-tighter text-accent">
-          BOERki
+    <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent selection:text-white flex flex-col items-center w-full">
+      
+      {/* Top Header */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-md border-b border-border-accent flex items-center justify-between px-6 md:px-12 z-50 transition-all">
+        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("tuis")}>
+          <BookOpen className="text-accent" size={24} strokeWidth={2.5} />
+          <span className="font-serif font-bold text-xl tracking-tight text-ink">BOERki</span>
         </div>
-        <div id="nav-links" className="hidden md:flex gap-8 text-[11px] uppercase tracking-[0.2em] font-medium opacity-70">
-          <a href="#projek" className="hover:text-accent transition-colors">Die Projek</a>
-          <a href="#argitektuur" className="hover:text-accent transition-colors">Argitektuur</a>
-          <a href="#vennote" className="hover:text-accent transition-colors">Vennote</a>
-          <a href="#kontak" className="hover:text-accent transition-colors">Kontak</a>
-        </div>
-        <div id="location-tag" className="hidden lg:block text-[10px] opacity-40 uppercase tracking-widest">
-          VRYSTAAT, SUID-AFRIKA
-        </div>
-      </nav>
+        
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="text-ink/70 hover:text-accent transition-colors p-2"
+          aria-label="Make kieslys oop"
+        >
+          <Grid size={24} />
+        </button>
+      </header>
 
-      <main>
-        {/* Hero Section */}
-        <section id="hero" className="container max-w-6xl mx-auto px-8 pt-24 pb-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Hero Text */}
+      {/* Slide-out Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <>
             <motion.div 
-              id="hero-content"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-sidebar/40 backdrop-blur-sm z-[60]"
+            />
+            <motion.aside 
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 bottom-0 w-[85vw] md:w-96 bg-sidebar text-sidebar-ink z-[70] flex flex-col shadow-2xl overflow-y-auto"
             >
-              <h1 id="hero-title" className="font-serif text-5xl lg:text-7xl leading-[1.05] tracking-tight mb-8">
-                Geïntegreerde <br />
-                <span className="text-accent italic">Landbou Opleiding.</span>
-              </h1>
-              <p id="hero-description" className="text-base lg:text-lg opacity-70 leading-relaxed max-w-lg mb-10 font-light text-ink/90">
-                Pionierswerk vir die implementering van die Departement van Basiese Onderwys se "Three Stream Model". BOERki bied 'n 
-                hiper-gelokaliseerde, aflyn-eerste leerhub om die gaping tussen 21ste-eeuse tegnologie en Suid-Afrikaanse plattelandse onderwys te oorbrug.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <a 
-                  id="cta-button-primary"
-                  href="#argitektuur" 
-                  className="inline-flex items-center gap-3 px-8 py-4 bg-accent text-bg text-[11px] font-bold uppercase tracking-widest rounded-sm hover:bg-white transition-all transform hover:-translate-y-1 active:translate-y-0"
+              <div className="flex items-center justify-between p-6 border-b border-sidebar-hover sticky top-0 bg-sidebar z-10">
+                <span className="font-serif font-bold text-xl tracking-tight">Kieslys</span>
+                <button 
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="text-sidebar-ink/70 hover:text-white p-2 rounded-full hover:bg-sidebar-hover transition-colors"
                 >
-                  Verken die Argitektuur
-                  <ArrowRight size={14} />
-                </a>
-                <a 
-                  id="cta-button-secondary"
-                  href="#kontak" 
-                  className="inline-flex items-center gap-3 px-8 py-4 border border-border-accent text-accent text-[11px] font-bold uppercase tracking-widest rounded-sm hover:bg-accent hover:text-bg transition-all transform hover:-translate-y-1 active:translate-y-0"
-                >
-                  Raak Betrokke
-                </a>
-              </div>
-            </motion.div>
-
-            {/* Visual Plate */}
-            <motion.div 
-              id="hero-visual"
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
-              className="relative aspect-[4/3] lg:h-[500px] bg-gradient-to-br from-[#0b1727] to-[#040914] border border-border-accent rounded-sm overflow-hidden shadow-2xl"
-            >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_70%)]" />
-              
-              <div id="visual-overlay" className="absolute bottom-8 left-8 text-[10px] uppercase tracking-[0.3em] opacity-30">
-                EST. 2024 &copy; ONDERWYS-MEESTERS
-              </div>
-
-              {/* Abstract Decorative Elements */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 border border-accent/10 rounded-full animate-[spin_30s_linear_infinite]" />
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/5 h-3/5 border border-accent/5 rounded-full animate-[spin_20s_linear_infinite_reverse]" />
-              
-              {/* Decorative data points */}
-              <div className="absolute top-1/4 right-1/4 w-2 h-2 bg-accent rounded-full blur-sm animate-pulse" />
-              <div className="absolute bottom-1/3 left-1/4 w-1.5 h-1.5 bg-accent/50 rounded-full blur-sm animate-pulse delay-500" />
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Feature Section */}
-        <section id="features" className="bg-glass/30 border-y border-border-accent py-24">
-          <div className="container max-w-6xl mx-auto px-8">
-            <div className="mb-20 text-center">
-              <span className="text-accent uppercase tracking-[0.3em] text-[10px] mb-4 block font-medium">Stategiese Posisionering</span>
-              <h2 className="font-serif text-3xl mb-4">Innoverende Leer-Argitektuur</h2>
-              <div className="w-16 h-px bg-accent mx-auto opacity-40" />
-            </div>
-            <div className="grid md:grid-cols-3 gap-8">
-              <FeatureCard 
-                id="feature-1"
-                number="01" 
-                title="Vanlyn-Eerste PWA" 
-                description="Gestruktureer om te funksioneer in KZN en Vrystaat se landelike kwintiel 1-3 skole met beperkte konnektiwiteit."
-                icon={<Shield className="text-accent/50" size={20} />}
-              />
-              <FeatureCard 
-                id="feature-2"
-                number="02" 
-                title="Sistemiese Belyning" 
-                description="Volledig nakomend aan die DBO se Nasionale Protokol vir Assessering met outomatiese verslaggenerering."
-                icon={<Users className="text-accent/50" size={20} />}
-              />
-              <FeatureCard 
-                id="feature-3"
-                number="03" 
-                title="Drie-Stroom Model" 
-                description="Akkommodeer akademiese asook Tegnies-Beroeps en Tegnies-Okkuperende vakke tegelykertyd."
-                icon={<Zap className="text-accent/50" size={20} />}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Argitektuur Section */}
-        <section id="argitektuur" className="py-24 overflow-hidden">
-          <div className="container max-w-6xl mx-auto px-8">
-            <div className="flex flex-col lg:flex-row gap-16 items-center">
-              <motion.div 
-                className="lg:w-1/2 order-2 lg:order-1"
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
-                <div className="relative p-10 border border-border-accent bg-glass/20 rounded-sm">
-                  <div className="grid grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                      <Cpu className="text-accent mb-2" size={24} />
-                      <h4 className="font-serif text-lg">Granulêre Meting</h4>
-                      <p className="text-xs opacity-60 font-light leading-relaxed">
-                        Data modelle wat beide CAPS bevoegdhede asook sagte 21ste-eeuse vaardighede weerspieël.
-                      </p>
-                    </div>
-                    <div className="space-y-3">
-                      <Droplets className="text-accent mb-2" size={24} />
-                      <h4 className="font-serif text-lg">Playlist Enjin</h4>
-                      <p className="text-xs opacity-60 font-light leading-relaxed">
-                        Universal Design for Learning (UDL) gebaseerde hiërargiese logikabome vir hiper-gepersonaliseerde take.
-                      </p>
-                    </div>
-                    <div className="space-y-3">
-                      <MapIcon className="text-accent mb-2" size={24} />
-                      <h4 className="font-serif text-lg">Slim Sinkronisasie</h4>
-                      <p className="text-xs opacity-60 font-light leading-relaxed">
-                        Datakluise met agtergrond-queueing vir wanneer lae-bandwydte konnektiwiteit wel bespeur word.
-                      </p>
-                    </div>
-                    <div className="space-y-3">
-                      <Tractor className="text-accent mb-2" size={24} />
-                      <h4 className="font-serif text-lg">Handel-Gesentreerd</h4>
-                      <p className="text-xs opacity-60 font-light leading-relaxed">
-                        Ondersteun portefeulje ontwikkeling (PATs) en rubric-gebaseerde assesserings vir beroepsgereedheid.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                className="lg:w-1/2 order-1 lg:order-2"
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-              >
-                <span className="text-accent uppercase tracking-[0.4em] text-[10px] mb-6 block">Akademiese Onderbou</span>
-                <h2 className="font-serif text-4xl lg:text-5xl mb-6 leading-tight">
-                  Meer as 'n platform. <br/><span className="italic opacity-80">'n Analitiese ekosisteem.</span>
-                </h2>
-                <p className="text-sm lg:text-base opacity-70 font-light leading-relaxed mb-8">
-                  Die implementering van opvoedkundige tegnologie verby hoë-profiel stedelike skole vereis fundamentele ingenieursverskuiwings. 
-                  Gewone wolkgebaseerde "LMS" stelsels faal in die Suid-Afrikaanse platteland as gevolg van "load shedding" en digitaal-ongelyke toegang.
-                  BOERki fokus op werklike skaalbaarheid deur die probleem plaaslik en vanlyn eerstens aan te pak.
-                </p>
-                <ul className="space-y-4">
-                  {[
-                    "Zero-rated verkeer op groot mobiele netwerke.",
-                    "Onderwyser paneelborde vir vinnige data interpretasie.",
-                    "Integrasie met oop-bron platforms (Siyavula ens.).",
-                    "Aksiegerigte intydse waarskuwingstelsels vir VOO leerders."
-                  ].map((item, i) => (
-                    <motion.li 
-                      key={i} 
-                      className="flex items-center gap-4 text-sm opacity-80"
-                      initial={{ opacity: 0, x: 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.1 }}
-                    >
-                      <div className="w-1 h-1 bg-accent rounded-full" />
-                      {item}
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-
-
-        {/* Gemeenskap & Kontak */}
-        <section id="vennote" className="py-24 bg-glass/10 border-t border-border-accent/40">
-          <div className="container max-w-6xl mx-auto px-8">
-            <div className="grid lg:grid-cols-2 gap-16">
-              {/* Community */}
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                className="bg-accent p-12 rounded-sm text-bg"
-              >
-                <h2 className="font-serif text-4xl lg:text-5xl mb-6 leading-tight">Implementerings-vennote gesoek.</h2>
-                <p className="text-sm lg:text-base mb-10 opacity-90 leading-relaxed font-medium">
-                  Ons soek aktief skole binne die landbousektor en tegnologievennote in siviele ingenieurswese om ons stelsel te loods en skaal volgens Suid-Afrikaanse behoeftes.
-                </p>
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-bg/10 flex items-center justify-center shrink-0">
-                      <MessageSquare size={18} />
-                    </div>
-                    <div>
-                      <h5 className="font-bold uppercase tracking-wider text-[10px]">Deel in die ekosisteem</h5>
-                      <p className="text-xs opacity-80 mt-1">Beta verenigbaarheidtoetse vir landbouskole.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-bg/10 flex items-center justify-center shrink-0">
-                      <Globe size={18} />
-                    </div>
-                    <div>
-                      <h5 className="font-bold uppercase tracking-wider text-[10px]">Streeks Ontwikkeling</h5>
-                      <p className="text-xs opacity-80 mt-1">Tegnologiese vennootskappe met provinsiale onderwys.</p>
-                    </div>
-                  </div>
-                </div>
-                <button className="mt-10 px-8 py-4 bg-bg text-accent text-[11px] font-bold uppercase tracking-widest rounded-sm hover:bg-white hover:text-bg transition-all">
-                  Registreer Belangstelling
+                  <X size={24} />
                 </button>
-              </motion.div>
-
-              {/* Contact Form */}
-              <motion.div 
-                id="kontak"
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                className="space-y-10"
-              >
-                <div>
-                  <h2 className="font-serif text-3xl lg:text-4xl mb-4">Strukturele Navrae</h2>
-                  <p className="opacity-60 text-sm font-light">Dien 'n aansoek in vir stelseldemonstrasies by jou distrikskantoor of onafhanklike netwerk.</p>
-                </div>
-
-                <form className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input type="text" placeholder="NAAM EN VAN" className="w-full bg-glass/50 border border-border-accent/50 p-4 text-[10px] tracking-widest uppercase focus:border-accent outline-none transition-colors" />
-                    <input type="email" placeholder="INSTANSIE EPOS" className="w-full bg-glass/50 border border-border-accent/50 p-4 text-[10px] tracking-widest uppercase focus:border-accent outline-none transition-colors" />
+              </div>
+              
+              <div className="flex-1 py-6">
+                <nav className="flex flex-col px-4 space-y-1">
+                  <SidebarItem icon={<Home size={18} />} label="Tuis" isActive={currentView === "tuis"} onClick={() => navigate("tuis")} />
+                  <SidebarItem icon={<Info size={18} />} label="Oor Ons" isActive={currentView === "oor-ons"} onClick={() => navigate("oor-ons")} />
+                  <SidebarItem icon={<Mail size={18} />} label="Kontak" isActive={currentView === "kontak"} onClick={() => navigate("kontak")} />
+                  
+                  <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-sidebar-ink/40 uppercase tracking-widest">
+                    Gebruiksgevalle
                   </div>
-                  <textarea placeholder="INSTANSIE BESONDERHEDE / DOELWITTE" rows={4} className="w-full bg-glass/50 border border-border-accent/50 p-4 text-[10px] tracking-widest uppercase focus:border-accent outline-none transition-colors resize-none"></textarea>
-                  <button className="w-full py-4 bg-accent text-bg text-[11px] font-bold uppercase tracking-widest rounded-sm hover:bg-white transition-all">
-                    Versoek Konsultasie
-                  </button>
-                </form>
+                  <SidebarItem icon={<Users size={18} />} label="Tuisskool Ouer Oplossing" isActive={currentView === "tuisskool"} onClick={() => navigate("tuisskool")} />
+                  <SidebarItem icon={<Building size={18} />} label="Skole Integrasie" isActive={currentView === "skole"} onClick={() => navigate("skole")} />
+                  <SidebarItem icon={<Shield size={18} />} label="Korporatiewe KMI" isActive={currentView === "korporatief"} onClick={() => navigate("korporatief")} />
+                  <SidebarItem icon={<MonitorSmartphone size={18} />} label="Ed-tegnologie" isActive={currentView === "ed-tegnologie"} onClick={() => navigate("ed-tegnologie")} />
+                  
+                  <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-sidebar-ink/40 uppercase tracking-widest">
+                    Hulpbronne & Groei
+                  </div>
+                  <SidebarItem icon={<GraduationCap size={18} />} label="Opleiding en Ontwikkeling" isActive={currentView === "opleiding"} onClick={() => navigate("opleiding")} />
+                  <SidebarItem icon={<Microscope size={18} />} label="Navorsing" isActive={currentView === "navorsing"} onClick={() => navigate("navorsing")} />
+                  <SidebarItem icon={<MessageSquare size={18} />} label="Gemeenskap" isActive={currentView === "gemeenskap"} onClick={() => navigate("gemeenskap")} />
+                  
+                  <div className="mt-8 px-4">
+                    <button 
+                      onClick={() => navigate("witpapiere")}
+                      className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white rounded px-4 py-4 text-[11px] font-bold uppercase tracking-widest transition-colors shadow-lg"
+                    >
+                      <Download size={16} />
+                      Die 4 Witpapiere
+                    </button>
+                  </div>
+                </nav>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
-                <div className="flex flex-wrap gap-8 pt-4">
-                  <div className="flex items-center gap-3">
-                    <Phone className="text-accent" size={14} />
-                    <span className="text-[11px] tracking-[0.1em] opacity-60">+27 (0) 51 000 1234</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="text-accent" size={14} />
-                    <span className="text-[11px] tracking-[0.1em] opacity-60">konsultasie@boerki.co.za</span>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </section>
+      {/* Main Content Area */}
+      <main className="w-full flex-1 pt-16 flex flex-col">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="flex-1 w-full flex flex-col"
+          >
+            {currentView === "tuis" && <LandingPage navigate={navigate} />}
+            {currentView === "oor-ons" && <GenericView title="Oor Ons" description="Vind meer uit oor BOERki se missie om die Suid-Afrikaanse platteland te bemagtig met voorpunt tegnologie en onderwys." />}
+            {currentView === "kontak" && <GenericView title="Kontak Ons" description="Reik uit vir vennootskappe, vroeë toegang, of enige vrae rakende ons argitektuur." />}
+            {currentView === "tuisskool" && <GenericView title="Tuisskool Ouer Oplossing" description="Gepersonaliseerde leerroetes en vanlyn-bruikbare materiaal vir onafhanklike tuisonderrig in landbou." />}
+            {currentView === "skole" && <GenericView title="Skole Integrasie & Wit-etikettering" description="Sistemiese belyning en wit-etikettering opsies vir formele onderwysinstellings en kwintiel 1-3 skole." />}
+            {currentView === "korporatief" && <GenericView title="Korporatiewe KMI" description="Geleenthede vir Korporatiewe Maatskaplike Investering (KMI/CSI) om landelike gemeenskappe via opvoedkundige infrastruktuur op te hef." />}
+            {currentView === "ed-tegnologie" && <GenericView title="Ed-tegnologie Samewerkings" description="Integrasie met ander platforms om 'n verenigde, zero-rated leer-ekosisteem te skep." />}
+            {currentView === "opleiding" && <GenericView title="Opleiding en Ontwikkeling" description="Fasiliteerders-en-onderwyseropleiding om die Drie-Stroom model doeltreffend te implementeer." />}
+            {currentView === "navorsing" && <GenericView title="Navorsing" description="Die akademiese fondasies en data-gedrewe navorsing wat BOERki se bevoegdheidsraamwerk (CBE) enjin dryf." />}
+            {currentView === "gemeenskap" && <GenericView title="Gemeenskap" description="Sluit aan by ons netwerk van onderwysers, landbouers en tegnoloë wat saamwerk aan 'n beter toekoms." />}
+            {currentView === "witpapiere" && <WhitepapersView navigate={navigate} />}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
-      <footer id="main-footer" className="container max-w-6xl mx-auto px-8 py-16 border-t border-border-accent/20">
-        <div className="grid md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-2">
-            <div className="font-serif text-xl font-bold tracking-tighter text-accent mb-6">BOERki VOO</div>
-            <p className="opacity-50 text-xs font-light leading-relaxed max-w-md">
-              Die toekoms van Suid-Afrikaanse leer begin hier. Ons oorbrug die digitale gaping met vanlyn-eerste en CAPS-belynde argitektuur ter voorbereiding vir die Fourth Industrial Revolution.
-            </p>
+      {/* Shared Footer */}
+      <footer className="w-full bg-surface border-t border-border-accent py-12 px-6 md:px-12 mt-auto">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-3">
+            <BookOpen className="text-accent/50" size={24} />
+            <span className="font-serif font-bold text-lg text-ink/70">BOERki</span>
           </div>
-          <div>
-            <h5 className="text-[9px] font-bold uppercase tracking-[0.2em] mb-6 opacity-60">Platformnavorsing</h5>
-            <ul className="space-y-3 text-[11px] opacity-50 font-light">
-              <li><a href="#" className="hover:text-accent transition-colors">Onderwyser Dashboards</a></li>
-              <li><a href="#" className="hover:text-accent transition-colors">Edge-Computing Enjin</a></li>
-              <li><a href="#" className="hover:text-accent transition-colors">CBE Metodologie</a></li>
-              <li><a href="#" className="hover:text-accent transition-colors">Sekuriteitsprotokol</a></li>
-            </ul>
+          <div className="flex items-center gap-4 text-sm font-medium">
+            <span className="text-ink/50">Vennote / Partners:</span>
+            <a 
+              href="https://everyspark.cc/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-accent hover:text-accent-muted transition-colors bg-accent/5 px-3 py-1.5 rounded"
+            >
+              everySPARK <ExternalLink size={14} />
+            </a>
           </div>
-          <div>
-            <h5 className="text-[9px] font-bold uppercase tracking-[0.2em] mb-6 opacity-60">Skakels</h5>
-            <ul className="space-y-3 text-[11px] opacity-50 font-light">
-              <li><a href="#" className="hover:text-accent transition-colors">Verslae</a></li>
-              <li><a href="#" className="hover:text-accent transition-colors">Ontwikkelaars</a></li>
-              <li><a href="#" className="hover:text-accent transition-colors">Werksgeleenthede</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="text-center text-[10px] uppercase tracking-[0.1em] opacity-30 pt-8 border-t border-border-accent/10">
-          &copy; {new Date().getFullYear()} BOERki Landbou Onderwys-Tegnologie.
         </div>
       </footer>
     </div>
   );
 }
 
-interface FeatureCardProps {
-  id: string;
-  number: string;
-  title: string;
-  description: string;
-  icon: ReactNode;
-}
-
-function FeatureCard({ id, number, title, description, icon }: FeatureCardProps) {
+function SidebarItem({ icon, label, isActive = false, onClick }: { icon: React.ReactNode, label: string, isActive?: boolean, onClick?: () => void }) {
   return (
-    <motion.div 
-      id={id}
-      initial={{ opacity: 0, y: 15 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -5 }}
-      transition={{ duration: 0.5 }}
-      className="bg-glass border border-border-accent/40 p-8 rounded-sm group hover:border-accent/30 transition-all cursor-pointer"
+    <button 
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded text-sm font-medium transition-all whitespace-nowrap w-full group
+        ${isActive 
+          ? "bg-white/10 text-white font-semibold" 
+          : "text-sidebar-ink/70 hover:bg-sidebar-hover hover:text-white"
+        }
+      `}
     >
-      <div className="flex justify-between items-start mb-6">
-        <div id={`${id}-number`} className="font-serif text-2xl text-accent group-hover:scale-110 transition-transform">
-          {number}
-        </div>
-        <div id={`${id}-icon`}>
-          {icon}
-        </div>
-      </div>
-      <h3 id={`${id}-title`} className="text-lg font-semibold mb-3 tracking-tight">{title}</h3>
-      <p id={`${id}-description`} className="text-[13px] opacity-60 leading-relaxed font-light">
-        {description}
-      </p>
-    </motion.div>
+      <span className={`${isActive ? "text-accent" : "text-sidebar-ink/40 group-hover:text-sidebar-ink/60"}`}>{icon}</span>
+      <span className="tracking-tight">{label}</span>
+      {isActive && <ChevronRight size={14} className="ml-auto opacity-50" />}
+    </button>
   );
 }
 
+// -------------------------------------------------------------
+// View Components
+// -------------------------------------------------------------
+
+function LandingPage({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      {/* Hero Section */}
+      <section className="w-full px-6 py-20 md:py-32 max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <div className="flex-1 space-y-8">
+          <span className="text-accent uppercase tracking-[0.2em] text-xs font-bold block border-l-2 border-accent pl-3">
+            Die BOERki Konsep
+          </span>
+          <h1 className="font-serif text-4xl md:text-6xl font-bold text-ink tracking-tight leading-[1.1]">
+            Geïntegreerde Landbou Opleiding <br className="hidden lg:block"/> vir 'n Veranderende SA.
+          </h1>
+          <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light max-w-2xl">
+            BOERki is nie net 'n toepassing nie—dit is 'n fundamentele herontwerp van hoe 
+            Tegnies-Beroeps en Tegnies-Okkuperende vakke aangebied word in landelike Suid-Afrikaanse skole
+            met beperkte infrastruktuur.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <button 
+              onClick={() => navigate("witpapiere")}
+              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+            >
+              <Download size={16} />
+              Laai Die Witpapiere Af
+            </button>
+            <button 
+              onClick={() => navigate("gebruiksgevalle")}
+              className="bg-surface border border-border-accent hover:border-accent hover:text-accent text-ink px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+            >
+              Verken Gebruiksgevalle <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 w-full bg-gradient-to-br from-surface to-bg border border-border-accent rounded-xl aspect-square md:aspect-[4/3] shadow-2xl relative overflow-hidden flex items-center justify-center">
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)]" />
+             <Target size={120} strokeWidth={0.5} className="text-accent/20" />
+             <div className="absolute bottom-6 left-6 right-6">
+                <div className="bg-white/80 backdrop-blur border border-border-accent p-4 rounded shadow-sm">
+                  <div className="flex items-center gap-3 mb-2">
+                    <WifiOff size={16} className="text-accent" />
+                    <span className="text-xs font-bold text-ink tracking-widest uppercase">Vanlyn-Eerste Infrastruktuur</span>
+                  </div>
+                  <div className="w-full bg-bg h-1.5 rounded-full overflow-hidden">
+                    <div className="w-[85%] bg-accent h-full" />
+                  </div>
+                </div>
+             </div>
+        </div>
+      </section>
+
+      {/* Overview Block replacing old "Zero Resistansie" block */}
+      <section className="w-full bg-surface border-y border-border-accent py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-ink mb-6">Die Volledige Argitektuur</h2>
+            <p className="text-lg text-ink/70 leading-relaxed font-light">
+              Ontdek die metodologie wat ons platform se bevoegdheidsgebaseerde (CBE) en CAPS-belynde enjin dryf, asook die fundamentele raamwerke wat landbou-onderwys herdefinieer.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-bg p-10 border border-border-accent rounded shadow-sm hover:border-accent transition-colors flex flex-col items-start group">
+              <BookOpen className="text-accent mb-6" size={32} strokeWidth={1.5} />
+              <h3 className="text-2xl font-bold mb-4 text-ink">Die 4 Kernraamwerke</h3>
+              <p className="text-ink/70 text-base leading-relaxed mb-8 flex-1">
+                Lees meer oor die fundamentele witpapiere wat BOERki se argitektuur dryf. Ons kombineer tegniese innovasie met tasbare pedagogiese metodes.
+              </p>
+              <button onClick={() => navigate("witpapiere")} className="text-accent text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all mt-auto py-2 bg-accent/5 px-4 rounded">
+                Verken Witpapiere <ArrowRight size={14} />
+              </button>
+            </div>
+            
+            <div className="bg-bg p-10 border border-border-accent rounded shadow-sm hover:border-accent transition-colors flex flex-col items-start group">
+              <Target className="text-accent mb-6" size={32} strokeWidth={1.5} />
+              <h3 className="text-2xl font-bold mb-4 text-ink">Veelsydige Gebruike</h3>
+              <p className="text-ink/70 text-base leading-relaxed mb-8 flex-1">
+                Meer as net 'n portaal vir skole. Ons oplossing skaleer vanaf individuele tuisskool ouers tot by nasionale korporatiewe KMI-inisiatiewe.
+              </p>
+              <button onClick={() => navigate("gebruiksgevalle")} className="text-accent text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all mt-auto py-2 bg-accent/5 px-4 rounded">
+                Sien Gebruiksgevalle <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA Block */}
+      <section className="w-full px-6 py-24">
+        <div className="max-w-4xl mx-auto bg-sidebar p-10 md:p-16 rounded shadow-2xl text-sidebar-ink relative overflow-hidden border border-sidebar-hover">
+          <div className="absolute right-[-5%] bottom-[-10%] opacity-5 pointer-events-none transform -rotate-12">
+             <Target size={300} strokeWidth={1} />
+          </div>
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-3xl font-serif font-bold mb-6 text-white max-w-lg">Kry die argitektoniese bloudrukke.</h2>
+            <p className="text-sidebar-ink/70 mb-10 max-w-xl text-lg leading-relaxed font-light">
+              Ons het vier omvattende witpapiere (white papers) gepubliseer wat presies verduidelik 
+              hoe om hierdie stelsels operasioneel te definieër en te implementeer. Transformeer jou benadering tot onderwys.
+            </p>
+            <button 
+              onClick={() => navigate("witpapiere")} 
+              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all hover:-translate-y-1 shadow-lg flex items-center gap-3 w-fit"
+            >
+              <Download size={18} />
+              Gaan na Aflaaiportaal
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function GenericView({ title, description }: { title: string, description: string }) {
+  return (
+    <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+      <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">{title}</h1>
+      <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+        {description}
+      </p>
+      
+      <div className="bg-surface border border-border-accent p-12 rounded shadow-sm flex flex-col items-center justify-center text-center min-h-[40vh]">
+         <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-6">
+           <Info className="text-accent" size={32} />
+         </div>
+         <h2 className="text-2xl font-bold text-ink mb-4">Inhoude Kom Binnekort</h2>
+         <p className="text-ink/60 max-w-md">
+           Hierdie blad is tans onder konstruksie of dien as 'n plek-houer vir opkomende funksionaliteit en bemarkingmateriaal.
+         </p>
+      </div>
+    </div>
+  );
+}
+
+function WhitepapersView({ navigate }: { navigate: (v: View) => void }) {
+  const papers = [
+    { 
+      title: "Kurrikulum Belyning (CAPS & CBE)", 
+      desc: "Ontdek hoe om die streng vereistes van die Nasionale Protokol vir Assessering te integreer met 'n progressiewe 21ste-eeuse Bevoegdheidsmatriks (CBE). Hierdie raamwerk stel opvoeders in staat om nie net generiese punte te gee nie, maar ware vaardigheidsbemeestering na te spoor en leerders aktief te motiveer om die stelsel te navigeer en self te bestuur." 
+    },
+    { 
+      title: "Vanlyn-Eerste Infrastruktuur", 
+      desc: "Leer die tegniese en logistiese geheime agter 'Edge-Computing' argitekture vir skole met onstabiele of geen internet konneksie nie. Hierdie witskrif verduidelik in praktiese terme hoe opvoeders 'n ononderbroke, asynchrone leeromgewing kan bou wat floreer te midde van beurtkrag asook data-tekorte in verafgeleë landelike gebiede." 
+    },
+    { 
+      title: "21ste Eeuse Bevoegdhede (4Cs)", 
+      desc: "Verken 'n in-diepte analise van die '4Cs' (Kritieke denke, Kreatiwiteit, Kommunikasie en Samewerking) asook hoe dit die beslissende grondslag vorm vir praktiese werksgereedheid onder SA se Drie-Stroom model. Identifiseer vaardigheidsleemtes in the onderwys en leer hoe om hierdie elemente te transformeer in konkrete, evalueerbare mylpale vir die leerder." 
+    },
+    { 
+      title: "Drie-Stroom Model Implementering", 
+      desc: "Kry 'n deeglike stap-vir-stap operasionele handleiding oor die naatlose fasilitering van Akademiese, Beroeps (Vocational) en Okkuperende (Occupational) vaardighede binne een enkele portefeulje. Hierdie model sal u bestuurspan bemagtig om komplekse verskille in leerder-aanlegte stelselmatig en winsgewend te akkommodeer." 
+    }
+  ];
+
+  return (
+    <div className="w-full">
+      <div className="bg-surface border-b border-border-accent">
+        <div className="max-w-4xl mx-auto px-6 py-20 pb-16">
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight">Die 4 Witpapiere</h1>
+          <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light max-w-2xl">
+            Laai een van hierdie afsonderlike witskrifte gratis af. Ons gevorderde navorsing 
+            bied die diepgaande akademiese en logistiese bestuurs-stappe wat tans benodig is om landbou-opleiding te herstruktureer en te innoveer.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="col-span-1 lg:col-span-7 space-y-6">
+          {papers.map((paper, i) => (
+            <div key={i} className="bg-surface border border-border-accent p-8 rounded shadow-sm hover:border-accent transition-all group relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <FileText size={80} strokeWidth={1} />
+              </div>
+              <h3 className="text-xl font-bold text-ink mb-4 group-hover:text-accent transition-colors relative z-10">{paper.title}</h3>
+              <p className="text-sm text-ink/70 leading-relaxed relative z-10 font-light">{paper.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="col-span-1 lg:col-span-5 relative">
+          <div className="sticky top-24 bg-sidebar border border-sidebar-hover rounded shadow-2xl p-8 text-sidebar-ink overflow-hidden">
+            <div className="absolute right-[-10%] bottom-[-10%] opacity-10 pointer-events-none transform rotate-12">
+              <Download size={200} strokeWidth={1} />
+            </div>
+            
+            <h3 className="text-2xl font-serif font-bold text-white mb-2 relative z-10">Laai 'n Afskrif Af</h3>
+            <p className="text-sm text-sidebar-ink/70 mb-8 relative z-10">Vul jou besonderhede in en die gekose PDF-skakel sal omgaande direk na jou e-pos gestuur word.</p>
+            
+            <form className="space-y-6 relative z-10">
+              <div>
+                <label className="block text-[10px] font-bold text-sidebar-ink/60 uppercase tracking-widest mb-2">Kies Jou Witpapier</label>
+                <select className="w-full bg-sidebar-hover border border-sidebar-ink/10 rounded px-4 py-3.5 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all text-white">
+                  <option value="caps">Kurrikulum Belyning (CAPS & CBE)</option>
+                  <option value="offline">Vanlyn-Eerste Infrastruktuur</option>
+                  <option value="skills">21ste Eeuse Bevoegdhede (4Cs)</option>
+                  <option value="threestream">Drie-Stroom Model Implementering</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-[10px] font-bold text-sidebar-ink/60 uppercase tracking-widest mb-2">NAAM</label>
+                <input type="text" className="w-full bg-sidebar-hover border border-sidebar-ink/10 rounded px-4 py-3.5 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-white/20 text-white" placeholder="bv. Johannes van Wyk" />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-sidebar-ink/60 uppercase tracking-widest mb-2">E-POSADRES</label>
+                <input type="email" className="w-full bg-sidebar-hover border border-sidebar-ink/10 rounded px-4 py-3.5 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-white/20 text-white" placeholder="jou.epos@skool.co.za" />
+              </div>
+
+              <button type="button" className="w-full bg-accent text-white font-bold text-[11px] uppercase tracking-widest px-4 py-4 rounded hover:bg-accent/90 transition-all hover:-translate-y-0.5 shadow-md mt-6 flex items-center justify-center gap-2">
+                <Download size={16} />
+                Stuur na E-pos
+              </button>
+              <p className="text-center text-[10px] text-sidebar-ink/40 uppercase tracking-widest mt-4">Ons belowe zero gemorspos.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,15 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-accent: #3b82f6;
-  --color-accent-muted: #1e40af;
-  --color-ink: #ffffff;
-  --color-bg: #0b1727;
-  --color-glass: rgba(255, 255, 255, 0.05);
-  --color-border-accent: rgba(59, 130, 246, 0.3);
+  --color-accent: #2563eb;
+  --color-accent-muted: #dbeafe;
+  --color-ink: #0f172a;
+  --color-ink-inverse: #ffffff;
+  --color-bg: #fafafa;
+  --color-surface: #ffffff;
+  --color-border-accent: #e2e8f0;
   
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
+  --color-sidebar: #020617;
+  --color-sidebar-ink: #f8fafc;
+  --color-sidebar-hover: #1e293b;
+
+  --color-header-bg: #020617;
+
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Open Sans", ui-monospace, monospace;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 :root {
