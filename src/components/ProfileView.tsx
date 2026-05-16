@@ -54,8 +54,12 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
   const handleLogin = async () => {
      try {
        await signInWithPopup(auth, new GoogleAuthProvider());
-     } catch (e) {
+     } catch (e: any) {
+       if (e?.code === 'auth/popup-closed-by-user' || e?.code === 'auth/cancelled-popup-request') {
+         return;
+       }
        console.error(e);
+       alert('Teken in het misluk. Probeer asseblief weer.');
      }
   };
 

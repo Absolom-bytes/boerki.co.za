@@ -72,8 +72,13 @@ export function CommunityView() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-    } catch (e) {
+    } catch (e: any) {
+      if (e?.code === 'auth/popup-closed-by-user' || e?.code === 'auth/cancelled-popup-request') {
+        // Ignored by user
+        return;
+      }
       console.error(e);
+      alert('Teken in het misluk. Probeer asseblief weer.');
     }
   };
 
