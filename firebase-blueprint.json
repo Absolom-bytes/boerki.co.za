@@ -1,0 +1,140 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile data",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "bio": { "type": "string" },
+        "followersCount": { "type": "number" },
+        "followingCount": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "createdAt"]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "Contact form submissions",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "message", "createdAt"]
+    },
+    "Branch": {
+      "title": "Branch",
+      "description": "A sub-forum or category for educational content.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "adminIds": { "type": "array", "items": { "type": "string" } },
+        "creatorId": { "type": "string" }
+      },
+      "required": ["name", "description", "createdAt", "adminIds", "creatorId"]
+    },
+    "Thread": {
+      "title": "Thread",
+      "description": "A post in a branch.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "upvotes": { "type": "number" },
+        "commentCount": { "type": "number" }
+      },
+      "required": ["title", "content", "authorId", "createdAt", "upvotes", "commentCount"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a thread.",
+      "type": "object",
+      "properties": {
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "upvotes": { "type": "number" }
+      },
+      "required": ["content", "authorId", "createdAt", "upvotes"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A direct message conversation.",
+      "type": "object",
+      "properties": {
+        "members": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["members", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "A message within a chat.",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "content": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderId", "content", "read", "createdAt"]
+    },
+    "Connection": {
+      "title": "Connection",
+      "description": "Represents a following/follower relationship.",
+      "type": "object",
+      "properties": {
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["createdAt"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": { "$ref": "User" },
+      "description": "User profiles"
+    },
+    "users/{userId}/following/{followedId}": {
+      "schema": { "$ref": "Connection" },
+      "description": "Users this user is following"
+    },
+    "users/{userId}/followers/{followerId}": {
+      "schema": { "$ref": "Connection" },
+      "description": "Users following this user"
+    },
+    "contacts": {
+      "schema": { "$ref": "Contact" },
+      "description": "Contact form submissions"
+    },
+    "branches": {
+      "schema": { "$ref": "Branch" },
+      "description": "Forum branches"
+    },
+    "branches/{branchId}/threads": {
+      "schema": { "$ref": "Thread" },
+      "description": "Threads within a branch"
+    },
+    "branches/{branchId}/threads/{threadId}/comments": {
+      "schema": { "$ref": "Comment" },
+      "description": "Comments on a thread"
+    },
+    "chats": {
+      "schema": { "$ref": "Chat" },
+      "description": "Direct message conversations"
+    },
+    "chats/{chatId}/messages": {
+      "schema": { "$ref": "ChatMessage" },
+      "description": "Messages in a direct message conversation"
+    }
+  }
+}

@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { ContactView } from "./components/ContactView";
+import { CommunityView } from "./components/CommunityView";
+import { ProfileView } from "./components/ProfileView";
+import { ChatView } from "./components/ChatView";
 import { 
   BookOpen, 
   Menu,
@@ -23,7 +27,8 @@ import {
   MessageSquare,
   Building,
   MonitorSmartphone,
-  ExternalLink
+  ExternalLink,
+  User
 } from "lucide-react";
 
 type View = 
@@ -38,7 +43,9 @@ type View =
   | "opleiding" 
   | "navorsing" 
   | "gemeenskap"
-  | "witpapiere";
+  | "witpapiere"
+  | "profiel"
+  | "boodskappe";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>("tuis");
@@ -55,18 +62,18 @@ export default function App() {
     <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent selection:text-white flex flex-col items-center w-full">
       
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-md border-b border-border-accent flex items-center justify-between px-6 md:px-12 z-50 transition-all">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-hover flex items-center justify-between px-6 md:px-12 z-50 transition-all">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("tuis")}>
-          <BookOpen className="text-accent" size={24} strokeWidth={2.5} />
-          <span className="font-serif font-bold text-xl tracking-tight text-ink">BOERki</span>
+          <BookOpen className="text-accent" size={26} strokeWidth={2.5} />
+          <span className="font-serif font-bold text-3xl tracking-tight text-white">BOERki</span>
         </div>
         
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="text-ink/70 hover:text-accent transition-colors p-2"
-          aria-label="Make kieslys oop"
+          className="text-white hover:text-accent transition-colors p-2"
+          aria-label="Maak kieslys oop"
         >
-          <Grid size={24} />
+          <Menu size={28} />
         </button>
       </header>
 
@@ -118,6 +125,8 @@ export default function App() {
                   <SidebarItem icon={<GraduationCap size={18} />} label="Opleiding en Ontwikkeling" isActive={currentView === "opleiding"} onClick={() => navigate("opleiding")} />
                   <SidebarItem icon={<Microscope size={18} />} label="Navorsing" isActive={currentView === "navorsing"} onClick={() => navigate("navorsing")} />
                   <SidebarItem icon={<MessageSquare size={18} />} label="Gemeenskap" isActive={currentView === "gemeenskap"} onClick={() => navigate("gemeenskap")} />
+                  <SidebarItem icon={<User size={18} />} label="My Profiel" isActive={currentView === "profiel"} onClick={() => navigate("profiel")} />
+                  <SidebarItem icon={<MessageSquare size={18} />} label="Boodskappe" isActive={currentView === "boodskappe"} onClick={() => navigate("boodskappe")} />
                   
                   <div className="mt-8 px-4">
                     <button 
@@ -148,14 +157,16 @@ export default function App() {
           >
             {currentView === "tuis" && <LandingPage navigate={navigate} />}
             {currentView === "oor-ons" && <GenericView title="Oor Ons" description="Vind meer uit oor BOERki se missie om die Suid-Afrikaanse platteland te bemagtig met voorpunt tegnologie en onderwys." />}
-            {currentView === "kontak" && <GenericView title="Kontak Ons" description="Reik uit vir vennootskappe, vroeë toegang, of enige vrae rakende ons argitektuur." />}
+            {currentView === "kontak" && <ContactView />}
             {currentView === "tuisskool" && <GenericView title="Tuisskool Ouer Oplossing" description="Gepersonaliseerde leerroetes en vanlyn-bruikbare materiaal vir onafhanklike tuisonderrig in landbou." />}
             {currentView === "skole" && <GenericView title="Skole Integrasie & Wit-etikettering" description="Sistemiese belyning en wit-etikettering opsies vir formele onderwysinstellings en kwintiel 1-3 skole." />}
             {currentView === "korporatief" && <GenericView title="Korporatiewe KMI" description="Geleenthede vir Korporatiewe Maatskaplike Investering (KMI/CSI) om landelike gemeenskappe via opvoedkundige infrastruktuur op te hef." />}
             {currentView === "ed-tegnologie" && <GenericView title="Ed-tegnologie Samewerkings" description="Integrasie met ander platforms om 'n verenigde, zero-rated leer-ekosisteem te skep." />}
             {currentView === "opleiding" && <GenericView title="Opleiding en Ontwikkeling" description="Fasiliteerders-en-onderwyseropleiding om die Drie-Stroom model doeltreffend te implementeer." />}
             {currentView === "navorsing" && <GenericView title="Navorsing" description="Die akademiese fondasies en data-gedrewe navorsing wat BOERki se bevoegdheidsraamwerk (CBE) enjin dryf." />}
-            {currentView === "gemeenskap" && <GenericView title="Gemeenskap" description="Sluit aan by ons netwerk van onderwysers, landbouers en tegnoloë wat saamwerk aan 'n beter toekoms." />}
+            {currentView === "gemeenskap" && <CommunityView />}
+            {currentView === "profiel" && <ProfileView navigate={navigate} />}
+            {currentView === "boodskappe" && <ChatView />}
             {currentView === "witpapiere" && <WhitepapersView navigate={navigate} />}
           </motion.div>
         </AnimatePresence>
@@ -211,15 +222,15 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="w-full px-6 py-20 md:py-32 max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-        <div className="flex-1 space-y-8">
-          <span className="text-accent uppercase tracking-[0.2em] text-xs font-bold block border-l-2 border-accent pl-3">
-            Die BOERki Konsep
+      <section className="w-full px-6 pt-12 pb-16 md:pt-20 md:pb-24 max-w-4xl mx-auto flex flex-col items-start gap-8">
+        <div className="w-full space-y-6">
+          <span className="text-accent uppercase tracking-[0.2em] text-[10px] font-bold block mb-2">
+            Kweetige Intelligensie
           </span>
-          <h1 className="font-serif text-4xl md:text-6xl font-bold text-ink tracking-tight leading-[1.1]">
+          <h1 className="font-serif text-xl md:text-2xl font-bold text-ink tracking-tight leading-snug">
             Geïntegreerde Landbou Opleiding <br className="hidden lg:block"/> vir 'n Veranderende SA.
           </h1>
-          <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light max-w-2xl">
+          <p className="text-base md:text-lg text-ink/70 leading-relaxed font-light max-w-2xl">
             BOERki is nie net 'n toepassing nie—dit is 'n fundamentele herontwerp van hoe 
             Tegnies-Beroeps en Tegnies-Okkuperende vakke aangebied word in landelike Suid-Afrikaanse skole
             met beperkte infrastruktuur.
@@ -239,21 +250,6 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
               Verken Gebruiksgevalle <ArrowRight size={16} />
             </button>
           </div>
-        </div>
-        <div className="flex-1 w-full bg-gradient-to-br from-surface to-bg border border-border-accent rounded-xl aspect-square md:aspect-[4/3] shadow-2xl relative overflow-hidden flex items-center justify-center">
-             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)]" />
-             <Target size={120} strokeWidth={0.5} className="text-accent/20" />
-             <div className="absolute bottom-6 left-6 right-6">
-                <div className="bg-white/80 backdrop-blur border border-border-accent p-4 rounded shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <WifiOff size={16} className="text-accent" />
-                    <span className="text-xs font-bold text-ink tracking-widest uppercase">Vanlyn-Eerste Infrastruktuur</span>
-                  </div>
-                  <div className="w-full bg-bg h-1.5 rounded-full overflow-hidden">
-                    <div className="w-[85%] bg-accent h-full" />
-                  </div>
-                </div>
-             </div>
         </div>
       </section>
 

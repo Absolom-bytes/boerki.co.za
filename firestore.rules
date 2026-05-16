@@ -1,0 +1,167 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'displayName', 'createdAt', 'followersCount', 'followingCount'])
+          && data.email is string && data.email.size() <= 200
+          && data.displayName is string && data.displayName.size() <= 100
+          && data.createdAt == request.time
+          && data.followersCount is number
+          && data.followingCount is number
+          && data.get('photoURL', '') is string
+          && data.get('bio', '') is string;
+    }
+
+    match /users/{userId} {
+      allow get: if true;
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() 
+                    && request.auth.uid == userId 
+                    && isValidUser(incoming())
+                    && incoming().followersCount == 0
+                    && incoming().followingCount == 0;
+      allow update: if isSignedIn() 
+                    && request.auth.uid == userId
+                    && (
+                      incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio'])
+                      && incoming().displayName is string && incoming().displayName.size() <= 100
+                      && incoming().get('photoURL', existing().get('photoURL', '')) is string
+                      && incoming().get('bio', existing().get('bio', '')) is string
+                    );
+    }
+    
+    function isValidConnection(data) {
+      return data.keys().hasAll(['createdAt']) && data.createdAt == request.time;
+    }
+
+    match /users/{userId}/following/{followedId} {
+      allow read: if true;
+      // User can only modify their own following list
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidConnection(incoming()) && exists(/databases/$(database)/documents/users/$(followedId));
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/followers/{followerId} {
+      allow read: if true;
+      // A user's follower list is modified by the person following them
+      allow create: if isSignedIn() && request.auth.uid == followerId && isValidConnection(incoming()) && exists(/databases/$(database)/documents/users/$(followerId));
+      allow delete: if isSignedIn() && request.auth.uid == followerId;
+    }
+
+    function isValidContact(data) {
+      return data.keys().hasAll(['name', 'email', 'message', 'createdAt'])
+        && data.name is string && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 200
+        && data.message is string && data.message.size() <= 5000
+        && data.createdAt == request.time;
+    }
+
+    match /contacts/{contactId} {
+      allow create: if isValidContact(incoming());
+      // No read access for public
+    }
+
+    function isValidBranch(data) {
+      return data.keys().hasAll(['name', 'description', 'createdAt', 'adminIds', 'creatorId'])
+        && data.name is string && data.name.size() <= 100
+        && data.description is string && data.description.size() <= 500
+        && data.createdAt == request.time
+        && data.adminIds is list && data.adminIds.size() > 0 && data.adminIds.size() <= 10 && data.adminIds[0] is string
+        && data.creatorId is string && data.creatorId == request.auth.uid;
+    }
+    
+    function isBranchAdmin(branchId) {
+       return request.auth.uid in get(/databases/$(database)/documents/branches/$(branchId)).data.adminIds;
+    }
+
+    match /branches/{branchId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidBranch(incoming()) && incoming().creatorId == request.auth.uid && request.auth.uid in incoming().adminIds;
+      allow update: if isSignedIn() && (request.auth.uid in existing().adminIds)
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'adminIds'])
+                    && incoming().get('name', existing().name) is string && incoming().get('name', existing().name).size() <= 100
+                    && incoming().get('description', existing().description) is string && incoming().get('description', existing().description).size() <= 500
+                    && incoming().get('adminIds', existing().adminIds) is list && incoming().get('adminIds', existing().adminIds).size() > 0 && incoming().get('adminIds', existing().adminIds).size() <= 10;
+    }
+
+    function isValidThread(data) {
+      return data.keys().hasAll(['title', 'content', 'authorId', 'createdAt', 'upvotes', 'commentCount'])
+        && data.title is string && data.title.size() <= 200
+        && data.content is string && data.content.size() <= 10000
+        && data.authorId == request.auth.uid
+        && data.createdAt == request.time
+        && data.upvotes == 0
+        && data.commentCount == 0;
+    }
+
+    match /branches/{branchId}/threads/{threadId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidThread(incoming()) && exists(/databases/$(database)/documents/branches/$(branchId));
+      allow update: if isSignedIn() && (existing().authorId == request.auth.uid || isBranchAdmin(branchId))
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content'])
+                    && incoming().get('title', existing().title) is string && incoming().get('title', existing().title).size() <= 200
+                    && incoming().get('content', existing().content) is string && incoming().get('content', existing().content).size() <= 10000;
+      allow delete: if isSignedIn() && (existing().authorId == request.auth.uid || isBranchAdmin(branchId));
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['content', 'authorId', 'createdAt', 'upvotes'])
+        && data.content is string && data.content.size() <= 5000
+        && data.authorId == request.auth.uid
+        && data.createdAt == request.time
+        && data.upvotes == 0;
+    }
+
+    match /branches/{branchId}/threads/{threadId}/comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isValidComment(incoming()) && exists(/databases/$(database)/documents/branches/$(branchId)/threads/$(threadId));
+      allow update: if isSignedIn() && (existing().authorId == request.auth.uid || isBranchAdmin(branchId))
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['content'])
+                    && incoming().get('content', existing().content) is string && incoming().get('content', existing().content).size() <= 5000;
+      allow delete: if isSignedIn() && (existing().authorId == request.auth.uid || isBranchAdmin(branchId));
+    }
+
+    function isValidChat(data) {
+      return data.keys().hasAll(['members', 'updatedAt'])
+        && data.members is list && data.members.size() == 2 
+        && request.auth.uid in data.members
+        && data.updatedAt == request.time
+        && data.get('lastMessage', '') is string;
+    }
+
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.members;
+      allow create: if isSignedIn() && isValidChat(incoming());
+      allow update: if isSignedIn() && request.auth.uid in existing().members
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['lastMessage', 'updatedAt'])
+                    && incoming().get('lastMessage', existing().get('lastMessage', '')) is string
+                    && incoming().updatedAt == request.time;
+    }
+
+    function isValidChatMessage(data) {
+      return data.keys().hasAll(['senderId', 'content', 'read', 'createdAt'])
+        && data.senderId == request.auth.uid
+        && data.content is string && data.content.size() <= 5000
+        && data.read == false
+        && data.createdAt == request.time;
+    }
+
+    match /chats/{chatId}/messages/{messageId} {
+      allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+      allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members
+                    && isValidChatMessage(incoming());
+      allow update: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['read'])
+                    && incoming().read == true;
+    }
+  }
+}
