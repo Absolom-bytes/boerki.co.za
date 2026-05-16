@@ -230,7 +230,6 @@ function UserManagementDash() {
   const [users, setUsers] = useState<any[]>([]);
   const [editingUser, setEditingUser] = useState<any>(null);
   const [editForm, setEditForm] = useState({ displayName: '', bio: '', photoURL: '' });
-  const [confirmAction, setConfirmAction] = useState<{ id: string, updates: any, title: string, message: string } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -251,12 +250,6 @@ function UserManagementDash() {
      } catch (err) {
        handleFirestoreError(err, OperationType.UPDATE, 'users');
      }
-  };
-
-  const handleConfirmAction = async () => {
-     if (!confirmAction) return;
-     await handleUpdate(confirmAction.id, confirmAction.updates);
-     setConfirmAction(null);
   };
 
   const handleSaveEdit = async () => {
@@ -323,35 +316,12 @@ function UserManagementDash() {
                       Waarsku
                     </button>
                     {u.status !== 'limbo' && (
-                       <button onClick={() => setConfirmAction({
-                          id: u.id,
-                          updates: { status: 'limbo' },
-                          title: 'Plaas in Limbo',
-                          message: 'Is jy seker jy wil hierdie gebruiker in Limbo plaas? Alle toegang sal tydelik opgeskort word vir ondersoek.'
-                       })} className="px-3 py-1 bg-purple-600/10 text-purple-700 text-xs font-bold hover:bg-purple-600/20">Limbo</button>
+                       <button onClick={() => handleUpdate(u.id, { status: 'limbo' })} className="px-3 py-1 bg-purple-600/10 text-purple-700 text-xs font-bold hover:bg-purple-600/20">Limbo</button>
                     )}
-                    {u.status === 'suspended' || u.status === 'limbo' || u.status === 'archived' ? (
-                       <button onClick={() => setConfirmAction({
-                          id: u.id,
-                          updates: { status: 'active' },
-                          title: 'Heraktiveer Gebruiker',
-                          message: 'Is jy seker jy wil hierdie gebruiker weer aktief maak? Hulle sal weer volle toegang he.'
-                       })} className="px-3 py-1 bg-ink text-ink-inverse text-xs font-bold hover:opacity-90">Heraktiveer</button>
+                    {u.status === 'suspended' || u.status === 'limbo' ? (
+                       <button onClick={() => handleUpdate(u.id, { status: 'active' })} className="px-3 py-1 bg-ink text-ink-inverse text-xs font-bold hover:opacity-90">Heraktiveer</button>
                     ) : (
-                       <button onClick={() => setConfirmAction({
-                          id: u.id,
-                          updates: { status: 'suspended' },
-                          title: 'Skors Gebruiker',
-                          message: 'Is jy seker jy wil hierdie gebruiker skors? Hulle sal nie kan indeken nie.'
-                       })} className="px-3 py-1 bg-red-600 text-white text-xs font-bold hover:opacity-90">Skors</button>
-                    )}
-                    {u.status !== 'archived' && (
-                       <button onClick={() => setConfirmAction({
-                          id: u.id,
-                          updates: { status: 'archived' },
-                          title: 'Argiveer Gebruiker',
-                          message: 'Is jy seker jy wil hierdie gebruiker argiveer? Dit is n finale toestand vir buite-werkingstelling.'
-                       })} className="px-3 py-1 bg-orange-600/10 text-orange-700 text-xs font-bold hover:bg-orange-600/20">Argiveer</button>
+                       <button onClick={() => handleUpdate(u.id, { status: 'suspended' })} className="px-3 py-1 bg-red-600 text-white text-xs font-bold hover:opacity-90">Skors</button>
                     )}
                  </td>
                </tr>
@@ -359,19 +329,6 @@ function UserManagementDash() {
           </tbody>
         </table>
       </div>
-
-      {confirmAction && (
-        <div className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-surface p-8 max-w-sm w-full rounded border border-border-accent relative">
-             <h3 className="font-serif text-xl font-bold mb-2">{confirmAction.title}</h3>
-             <p className="text-ink/70 text-sm mb-6">{confirmAction.message}</p>
-             <div className="flex justify-end gap-3">
-               <button onClick={() => setConfirmAction(null)} className="px-4 py-2 text-sm font-bold uppercase tracking-widest text-ink/60 hover:text-ink">Kanselleer</button>
-               <button onClick={handleConfirmAction} className="px-4 py-2 bg-ink text-ink-inverse text-sm font-bold uppercase tracking-widest hover:opacity-90">Bevestig</button>
-             </div>
-          </div>
-        </div>
-      )}
 
       {editingUser && (
         <div className="fixed inset-0 bg-ink/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">

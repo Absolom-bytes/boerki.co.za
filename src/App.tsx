@@ -159,7 +159,7 @@ export default function App() {
 
           <button 
             onClick={() => setIsSidebarOpen(true)}
-            className="text-white hover:text-accent transition-colors p-2 md:hidden"
+            className="text-white hover:text-accent transition-colors p-2"
             aria-label="Maak kieslys oop"
           >
             <Menu size={28} />
@@ -300,7 +300,9 @@ export default function App() {
                 <h4 className="font-bold text-sm tracking-widest uppercase mb-6 text-ink/40">Gemeenskap</h4>
                 <ul className="space-y-3 text-sm text-ink/70">
                     <li><button onClick={() => navigate("gemeenskap")} className="hover:text-ink transition-colors">Forum</button></li>
+                    <li><button onClick={() => navigate("boodskappe")} className="hover:text-ink transition-colors">Boodskappe</button></li>
                     <li><button onClick={() => navigate("profiel")} className="hover:text-ink transition-colors">Profiel</button></li>
+                    <li><button onClick={() => navigate("admin")} className="hover:text-ink transition-colors">Admin Konsole</button></li>
                     <li><button onClick={() => navigate("kontak")} className="hover:text-ink transition-colors">Kontak Ons</button></li>
                 </ul>
             </div>
