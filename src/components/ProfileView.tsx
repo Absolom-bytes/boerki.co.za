@@ -57,7 +57,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
          <UserIcon className="mx-auto text-accent/40 mb-6" size={64}/>
          <h1 className="font-serif text-4xl font-bold mb-4">My Profiel</h1>
          <p className="text-ink/60 mb-8 max-w-sm mx-auto">Teken in om jou profiel te bestuur, ander gebruikers te volg, en jou inligting op te dateer.</p>
-         <button onClick={handleLogin} className="bg-ink text-surface px-8 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md inline-flex items-center gap-2 hover:opacity-90">
+         <button onClick={handleLogin} className="bg-ink text-ink-inverse px-8 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md inline-flex items-center gap-2 hover:opacity-90">
            <LogIn size={16}/> Teken In
          </button>
        </div>
@@ -93,7 +93,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
                    placeholder="Vertel ons oor jouself..."
                  />
                  <div className="flex gap-2">
-                   <button onClick={handleSaveBio} className="bg-ink text-surface text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded hover:opacity-90">Stoor</button>
+                   <button onClick={handleSaveBio} className="bg-ink text-ink-inverse text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded hover:opacity-90">Stoor</button>
                    <button onClick={() => setEditing(false)} className="text-ink/60 text-[10px] font-bold uppercase tracking-widest px-4 py-2">Kanselleer</button>
                  </div>
                </div>
@@ -260,7 +260,7 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
          </button>
          <button 
            onClick={toggleFollow}
-           className={`px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded transition-all ${isFollowing ? 'bg-bg text-ink/70 border border-border-accent' : 'bg-ink text-surface hover:opacity-90'}`}
+           className={`px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded transition-all ${isFollowing ? 'bg-bg text-ink/70 border border-border-accent' : 'bg-ink text-ink-inverse hover:opacity-90'}`}
          >
            {isFollowing ? 'Volg Klaar' : 'Volg'}
          </button>

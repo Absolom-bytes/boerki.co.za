@@ -184,7 +184,7 @@ export default function App() {
                   <div className="mt-8 px-4">
                     <button 
                       onClick={() => navigate("witpapiere")}
-                      className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90 rounded px-4 py-4 text-[11px] font-bold uppercase tracking-widest transition-colors shadow-lg"
+                      className="w-full flex items-center justify-center gap-2 bg-ink text-ink-inverse hover:opacity-90 rounded px-4 py-4 text-[11px] font-bold uppercase tracking-widest transition-colors shadow-lg"
                     >
                       <Download size={16} />
                       Die 4 Witpapiere
@@ -209,14 +209,14 @@ export default function App() {
             className="flex-1 w-full flex flex-col"
           >
             {currentView === "tuis" && <LandingPage navigate={navigate} />}
-            {currentView === "oor-ons" && <GenericView title="Oor Ons" description="Vind meer uit oor BOERki se missie om die Suid-Afrikaanse platteland te bemagtig met voorpunt tegnologie en onderwys." />}
+            {currentView === "oor-ons" && <OorOnsView />}
             {currentView === "kontak" && <ContactView />}
-            {currentView === "tuisskool" && <GenericView title="Tuisskool Ouer Oplossing" description="Gepersonaliseerde leerroetes en vanlyn-bruikbare materiaal vir onafhanklike tuisonderrig in landbou." />}
-            {currentView === "skole" && <GenericView title="Skole Integrasie & Wit-etikettering" description="Sistemiese belyning en wit-etikettering opsies vir formele onderwysinstellings en kwintiel 1-3 skole." />}
-            {currentView === "korporatief" && <GenericView title="Korporatiewe KMI" description="Geleenthede vir Korporatiewe Maatskaplike Investering (KMI/CSI) om landelike gemeenskappe via opvoedkundige infrastruktuur op te hef." />}
-            {currentView === "ed-tegnologie" && <GenericView title="Ed-tegnologie Samewerkings" description="Integrasie met ander platforms om 'n verenigde, zero-rated leer-ekosisteem te skep." />}
-            {currentView === "opleiding" && <GenericView title="Opleiding en Ontwikkeling" description="Fasiliteerders-en-onderwyseropleiding om die Drie-Stroom model doeltreffend te implementeer." />}
-            {currentView === "navorsing" && <GenericView title="Navorsing" description="Die akademiese fondasies en data-gedrewe navorsing wat BOERki se bevoegdheidsraamwerk (CBE) enjin dryf." />}
+            {currentView === "tuisskool" && <TuisskoolView navigate={navigate} />}
+            {currentView === "skole" && <SkoleView navigate={navigate} />}
+            {currentView === "korporatief" && <KorporatiefView navigate={navigate} />}
+            {currentView === "ed-tegnologie" && <EdTechView navigate={navigate} />}
+            {currentView === "opleiding" && <OpleidingView navigate={navigate} />}
+            {currentView === "navorsing" && <NavorsingView navigate={navigate} />}
             {currentView === "gemeenskap" && <CommunityView />}
             {currentView === "profiel" && <ProfileView navigate={navigate} />}
             {currentView === "boodskappe" && <ChatView />}
@@ -275,9 +275,9 @@ export default function App() {
               href="https://everyspark.cc/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-surface bg-ink hover:opacity-90 transition-opacity px-3 py-1.5 rounded"
+              className="flex items-center gap-1.5 text-ink-inverse bg-ink hover:opacity-90 transition-opacity px-3 py-1.5 rounded"
             >
-              everySPARK <ExternalLink size={14} />
+              EverySpark <ExternalLink size={14} />
             </a>
           </div>
         </div>
@@ -332,13 +332,13 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
             <button 
               onClick={() => navigate("witpapiere")}
-              className="bg-ink hover:bg-ink/90 text-surface w-full sm:w-auto px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              className="bg-ink hover:opacity-90 text-ink-inverse w-full sm:w-auto px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
             >
               Laai Witpapiere Af
             </button>
             <button 
               onClick={() => navigate("gebruiksgevalle")}
-              className="bg-transparent border border-ink/20 hover:border-ink hover:bg-ink/5 text-ink w-full sm:w-auto px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+              className="bg-transparent border border-ink/20 hover:border-ink hover:bg-ink hover:text-ink-inverse text-ink w-full sm:w-auto px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
             >
               Verken Gebruiksgevalle
             </button>
@@ -419,22 +419,123 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
   );
 }
 
-function GenericView({ title, description }: { title: string, description: string }) {
+function OorOnsView() {
   return (
     <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
-      <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">{title}</h1>
+      <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Meer Oor BOERki</h1>
       <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
-        {description}
+        Vind meer uit oor BOERki se missie om die Suid-Afrikaanse platteland te bemagtig met voorpunt tegnologie en onderwys.
       </p>
-      
-      <div className="bg-surface border border-border-accent p-12 rounded shadow-sm flex flex-col items-center justify-center text-center min-h-[40vh]">
-         <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-6">
-           <Info className="text-accent" size={32} />
-         </div>
-         <h2 className="text-2xl font-bold text-ink mb-4">Inhoude Kom Binnekort</h2>
-         <p className="text-ink/60 max-w-md">
-           Hierdie blad is tans onder konstruksie of dien as 'n plek-houer vir opkomende funksionaliteit en bemarkingmateriaal.
-         </p>
+      <div className="space-y-8 text-ink/80 leading-relaxed">
+        <p>Ons glo dat tegnologiese agterstand in landelike gebiede nie 'n onoplosbare struikelblok hoef te wees nie. Met ons argitektuur bied ons gelyke en hoë-gehalte opvoeding wat die Suid-Afrikaanse Drie-Stroom model ondersteun.</p>
+        <p>Ons benadering inkorporeer bevoegdheidsgebaseerde leer (CBE) en vanlyn-eerste infrastruktuur sodat skole ononderbroke toegang het tot wêreldklas materiaal.</p>
+      </div>
+    </div>
+  );
+}
+
+function TuisskoolView({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Tuisskool Ouer Oplossing</h1>
+        <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+          Gepersonaliseerde leerroetes en vanlyn-bruikbare materiaal vir onafhanklike tuisonderrig in landbou.
+        </p>
+        <div className="bg-surface border border-border-accent p-8 rounded shadow-sm mb-12">
+          <h2 className="text-2xl font-bold text-ink mb-4">Gepersonaliseerde Leerroetes (Pathways)</h2>
+          <p className="text-ink/80 mb-6">Ons platform stel ouers in staat om 'n 100% gepersonaliseerde roete vir hul kinders te ontsluit, afhangende van hul individuele tempo, voorkeure, en langtermyn mikpunte in die landbousektor. Ons platform akkommodeer elke stadium van kognitiewe ontwikkeling.</p>
+          <button onClick={() => navigate("witpapiere")} className="bg-ink text-ink-inverse px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">Laai Witskrif Af <Download size={16} /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkoleView({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Skole Integrasie & Wit-Etikettering</h1>
+        <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+          Sistemiese belyning en wit-etikettering opsies vir formele onderwysinstellings en kwintiel 1-3 skole.
+        </p>
+        <div className="bg-surface border border-border-accent p-8 rounded shadow-sm mb-12">
+          <h2 className="text-2xl font-bold text-ink mb-4">Skoolhoof en Onderwyser Dashboards</h2>
+          <p className="text-ink/80 mb-6">Vir formele instellings sentraliseer BOERki al die uiteenlopende datastrome en verslae vanaf verskillende ed-tegnologie bronne in een skoon, 'Single Pane of Glass'. Dit spaar onderwysers etlike ure van sinnelose data-invoer en verseker die nakoming van CAPS riglyne sonder wrywing.</p>
+          <button onClick={() => navigate("kontak")} className="bg-ink text-ink-inverse px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">Kontak Ons <ChevronRight size={16} /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KorporatiefView({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Korporatiewe KMI</h1>
+        <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+          Geleenthede vir Korporatiewe Maatskaplike Investering (KMI/CSI) om landelike gemeenskappe via opvoedkundige infrastruktuur op te hef.
+        </p>
+        <div className="bg-surface border border-border-accent p-8 rounded shadow-sm mb-12">
+          <h2 className="text-2xl font-bold text-ink mb-4">Waarborg van Impak (Data-Led Social Impact)</h2>
+          <p className="text-ink/80 mb-6">In plaas van geïsoleerde skenkings wat moeilik meetbaar is, bied BOERki 'n geïntegreerde platform wat data-gedrewe en kwantifiseerbare bewys lewer vir maatskappye se KMI besteding. Sien regstreeks die transformasie asook vaardigheidsopheffing van die gemeenskap wat julle befonds.</p>
+          <button onClick={() => navigate("kontak")} className="bg-ink text-ink-inverse px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">Start a Partnership <ChevronRight size={16} /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EdTechView({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Ed-Tegnologie Samewerkings</h1>
+        <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+          Integrasie met ander platforms om 'n verenigde, zero-rated leer-ekosisteem te skep.
+        </p>
+        <div className="bg-surface border border-border-accent p-8 rounded shadow-sm mb-12">
+          <h2 className="text-2xl font-bold text-ink mb-4">Vennote in Tegnologie (API & LTI Integrasie)</h2>
+          <p className="text-ink/80 mb-6">Ons platform benut hoogs-aanpasbare integrasiesketting. Ons vennoot aktief met derdeparty produkte soos Siyavula, Canvas asook ander om die DC Matrix van krag te voorsien. Die ekosisteem word hierdeur aansienlik meer waardevol en relevant vit Suid-Afrika se spesifieke skoolraamwerke.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OpleidingView({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Opleiding & Ontwikkeling</h1>
+        <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+          Fasiliteerders-en-onderwyseropleiding om die Drie-Stroom model doeltreffend te implementeer.
+        </p>
+        <div className="bg-surface border border-border-accent p-8 rounded shadow-sm mb-12">
+          <h2 className="text-2xl font-bold text-ink mb-4">Die Bemagtigingsnetwerk</h2>
+          <p className="text-ink/80 mb-6">Onderwysersopleiding staan sentraal tot die BOERki argitektuur. Ons poog om plattelandse leierskragte op te hef om sodoende met gemak die 21ste Eeuse tegnologie tot voordeel van hul lokale skole aan te wend. Ons rus u fasiliteerders toe om sukses te verseker.</p>
+          <button onClick={() => navigate("kontak")} className="bg-ink text-ink-inverse px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">Doen Navraag <ChevronRight size={16} /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavorsingView({ navigate }: { navigate: (v: View) => void }) {
+  return (
+    <div className="w-full">
+      <div className="max-w-4xl mx-auto w-full px-6 py-20 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-ink mb-6 tracking-tight leading-tight">Navorsing</h1>
+        <p className="text-lg md:text-xl text-ink/70 leading-relaxed font-light mb-12 max-w-2xl">
+          Die akademiese fondasies en data-gedrewe navorsing wat BOERki se bevoegdheidsraamwerk (CBE) enjin dryf.
+        </p>
+        <div className="bg-surface border border-border-accent p-8 rounded shadow-sm mb-12">
+          <h2 className="text-2xl font-bold text-ink mb-4">Geloofwaardige Kennisstelsels</h2>
+          <p className="text-ink/80 mb-6">Al ons stelsels word gedryf deur omvattende dataontleding asook portuurbeoordeelde metodologieë van institusies wêreldwyd. Laai gerus die beskikbare witpapiere af om the spesifieke besonderhede rakende CAPS en Nasionale Protokol in-diepte te bekyk.</p>
+          <button onClick={() => navigate("witpapiere")} className="bg-ink text-ink-inverse px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2">Lees Navorsing <ChevronRight size={16} /></button>
+        </div>
       </div>
     </div>
   );

@@ -165,7 +165,7 @@ function MessageThread({ chat, user }: { chat: any, user: User }) {
              const isMe = msg.senderId === user.uid;
              return (
                <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[70%] p-3 rounded-lg text-sm ${isMe ? 'bg-ink text-surface rounded-br-none' : 'bg-bg border border-border-accent text-ink rounded-bl-none'}`}>
+                  <div className={`max-w-[70%] p-3 rounded-lg text-sm ${isMe ? 'bg-ink text-ink-inverse rounded-br-none' : 'bg-bg border border-border-accent text-ink rounded-bl-none'}`}>
                      {msg.content}
                      <div className={`text-[9px] mt-1 text-right ${isMe ? 'text-white/70' : 'text-ink/40'}`}>
                         {msg.createdAt?.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -185,7 +185,7 @@ function MessageThread({ chat, user }: { chat: any, user: User }) {
                className="flex-1 border border-border-accent bg-surface p-3 text-sm focus:border-accent outline-none rounded"
                placeholder="Tik 'n boodskap..."
              />
-             <button type="submit" disabled={!content.trim()} className="bg-ink text-surface px-4 rounded disabled:opacity-50 hover:opacity-90">
+             <button type="submit" disabled={!content.trim()} className="bg-ink text-ink-inverse px-4 rounded disabled:opacity-50 hover:opacity-90">
                <Send size={18} />
              </button>
           </form>
