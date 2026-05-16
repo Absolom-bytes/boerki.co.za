@@ -9,12 +9,32 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
   const [profile, setProfile] = useState<any>(null);
   const [editing, setEditing] = useState(false);
   const [bio, setBio] = useState('');
+  const [activeTab, setActiveTab] = useState<'profile' | 'followers' | 'following'>('profile');
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
       setUser(u);
       if (u) {
         const docRef = doc(db, 'users', u.uid);
+        // Ensure user document exists before attaching snapshot
+        const userSnap = await getDoc(docRef);
+        if (!userSnap.exists()) {
+          try {
+            await setDoc(docRef, {
+              email: u.email,
+              displayName: u.displayName || 'Unnamed User',
+              photoURL: u.photoURL || '',
+              bio: '',
+              followersCount: 0,
+              followingCount: 0,
+              createdAt: serverTimestamp()
+            });
+          } catch(e) {
+            console.error(e);
+          }
+        }
+        
         const unsubscribe = onSnapshot(docRef, (docSnap) => {
           if (docSnap.exists()) {
             setProfile({ id: docSnap.id, ...docSnap.data() });
@@ -66,21 +86,31 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
 
   if (!profile) return <div className="p-20 text-center">LAAI PROFIEL...</div>;
 
+  if (selectedUserId && selectedUserId !== profile.id) {
+    return (
+       <OtherUserProfileView 
+         userId={selectedUserId} 
+         currentUser={profile} 
+         onBack={() => setSelectedUserId(null)} 
+       />
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto w-full px-6 py-12 md:py-16">
       <h1 className="font-serif text-4xl font-bold text-ink mb-10 tracking-tight">My Profiel</h1>
       
       <div className="bg-surface border border-border-accent rounded p-8 shadow-sm mb-8 flex flex-col md:flex-row gap-8 items-start">
-         <img src={profile.photoURL || `https://ui-avatars.com/api/?name=${profile.displayName}`} className="w-24 h-24 rounded-full border border-border-accent" alt="avatar" />
+         <img src={profile.photoURL || `https://ui-avatars.com/api/?name=${profile.displayName}`} className="w-24 h-24 rounded-full border border-border-accent bg-white" alt="avatar" />
          
          <div className="flex-1">
             <h2 className="text-2xl font-bold">{profile.displayName}</h2>
             <p className="text-ink/60 text-sm mb-4">{profile.email}</p>
             
             <div className="flex gap-4 mb-6 text-sm font-bold">
-               <div className="flex items-center gap-1.5"><Users size={16} className="text-accent"/> {profile.followersCount || 0} Volgelinge</div>
+               <button onClick={() => setActiveTab('followers')} className="flex items-center gap-1.5 hover:text-accent transition-colors"><Users size={16} className="text-accent"/> {profile.followersCount || 0} Volgelinge</button>
                <div className="text-ink/40">•</div>
-               <div>{profile.followingCount || 0} Volgend</div>
+               <button onClick={() => setActiveTab('following')} className="hover:text-accent transition-colors">{profile.followingCount || 0} Volgend</button>
             </div>
 
             {editing ? (
@@ -112,16 +142,53 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
          </div>
       </div>
       
-      {/* Badges Section */}
-      <div className="mt-8 mb-12">
-         <ProfileBadges badges={profile.badges || []} />
+      {/* Tabs */}
+      <div className="flex gap-4 border-b border-border-accent mb-8">
+        <button 
+          onClick={() => setActiveTab('profile')}
+          className={`pb-2 text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'profile' ? 'border-b-2 border-accent text-ink' : 'text-ink/50 hover:text-ink/80'}`}
+        >
+          Oorsig
+        </button>
+        <button 
+          onClick={() => setActiveTab('followers')}
+          className={`pb-2 text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'followers' ? 'border-b-2 border-accent text-ink' : 'text-ink/50 hover:text-ink/80'}`}
+        >
+          Volgelinge
+        </button>
+        <button 
+          onClick={() => setActiveTab('following')}
+          className={`pb-2 text-sm font-bold uppercase tracking-widest transition-colors ${activeTab === 'following' ? 'border-b-2 border-accent text-ink' : 'text-ink/50 hover:text-ink/80'}`}
+        >
+          Volgend
+        </button>
       </div>
 
-      {/* Directory of all users to follow */}
-      <div className="mt-12">
-        <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Ontdek Ander Gebruikers</h3>
-        <UserDirectory currentUser={profile} />
-      </div>
+      {activeTab === 'profile' && (
+        <>
+          <div className="mt-8 mb-12">
+             <ProfileBadges badges={profile.badges || []} />
+          </div>
+          <div className="mt-12">
+            <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Ontdek Ander Gebruikers</h3>
+            <UserDirectory currentUser={profile} mode="discover" onUserClick={setSelectedUserId} />
+          </div>
+        </>
+      )}
+
+      {activeTab === 'followers' && (
+        <div className="mt-8">
+          <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Jou Volgelinge</h3>
+          <UserDirectory currentUser={profile} mode="followers" onUserClick={setSelectedUserId} />
+        </div>
+      )}
+
+      {activeTab === 'following' && (
+        <div className="mt-8">
+          <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Mense wat jy volg</h3>
+          <UserDirectory currentUser={profile} mode="following" onUserClick={setSelectedUserId} />
+        </div>
+      )}
 
     </div>
   );
@@ -162,28 +229,71 @@ function ProfileBadges({ badges }: { badges: string[] }) {
   );
 }
 
-function UserDirectory({ currentUser }: { currentUser: any }) {
+function UserDirectory({ currentUser, mode, onUserClick }: { currentUser: any, mode: 'discover' | 'followers' | 'following', onUserClick: (id: string) => void }) {
   const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
-    const q = query(collection(db, 'users'));
-    // we just fetch all for now, in a real production environment this should be paginated
-    getDocs(q).then(snapshot => {
-       const u = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(user => user.id !== currentUser.id);
-       setUsers(u);
-    });
-  }, [currentUser.id]);
+    const fetchUsers = async () => {
+      try {
+        if (mode === 'discover') {
+          const q = query(collection(db, 'users'));
+          const snapshot = await getDocs(q);
+          const u = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(user => user.id !== currentUser.id);
+          setUsers(u);
+        } else if (mode === 'followers') {
+          const snapshot = await getDocs(collection(db, `users/${currentUser.id}/followers`));
+          const userIds = snapshot.docs.map(doc => doc.id);
+          if (userIds.length > 0) {
+            const u = [];
+            for (const uid of userIds) {
+               const docSnap = await getDoc(doc(db, 'users', uid));
+               if (docSnap.exists()) {
+                 u.push({ id: docSnap.id, ...docSnap.data() });
+               }
+            }
+            setUsers(u);
+          } else {
+            setUsers([]);
+          }
+        } else if (mode === 'following') {
+          const snapshot = await getDocs(collection(db, `users/${currentUser.id}/following`));
+          const userIds = snapshot.docs.map(doc => doc.id);
+          if (userIds.length > 0) {
+            const u = [];
+            for (const uid of userIds) {
+               const docSnap = await getDoc(doc(db, 'users', uid));
+               if (docSnap.exists()) {
+                 u.push({ id: docSnap.id, ...docSnap.data() });
+               }
+            }
+            setUsers(u);
+          } else {
+            setUsers([]);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
+    fetchUsers();
+  }, [currentUser.id, mode]);
+
+  if (users.length === 0) {
+    if (mode === 'followers') return <div className="text-ink/50 text-sm">Jy het nog geen volgelinge nie.</div>;
+    if (mode === 'following') return <div className="text-ink/50 text-sm">Jy volg nog niemand nie.</div>;
+    return <div className="text-ink/50 text-sm">Geen ander gebruikers gevind nie.</div>;
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
        {users.map(u => (
-          <UserCard key={u.id} user={u} currentUser={currentUser} />
+          <UserCard key={u.id} user={u} currentUser={currentUser} onClick={() => onUserClick(u.id)} />
        ))}
     </div>
   );
 }
 
-function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
+function UserCard({ user, currentUser, onClick }: { user: any, currentUser: any, onClick: () => void }) {
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
@@ -196,8 +306,8 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
     checkFollowing();
   }, [currentUser.id, user.id]);
 
-  const toggleFollow = async () => {
-    // Basic optimisitic UI could be added, but for now just raw calls
+  const toggleFollow = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
        const followingRef = doc(db, `users/${currentUser.id}/following/${user.id}`);
        const followerRef = doc(db, `users/${user.id}/followers/${currentUser.id}`);
@@ -205,6 +315,8 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
        if (isFollowing) {
           await deleteDoc(followingRef);
           await deleteDoc(followerRef);
+          // Also decrement counts (omitted in this basic demo, but usually you'd use a transaction or cloud function)
+          // Since we aren't doing atomic counters in this specific function without more code, we just delete doc.
           setIsFollowing(false);
        } else {
           await setDoc(followingRef, { createdAt: serverTimestamp() });
@@ -216,9 +328,9 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
     }
   };
 
-  const startChat = async () => {
+  const startChat = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
-      // Very naive implementation: check if chat exists, if not create one.
       const q = query(collection(db, 'chats'), where('members', 'array-contains', currentUser.id));
       const snap = await getDocs(q);
       let existingChat = null;
@@ -244,9 +356,12 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
   };
 
   return (
-    <div className="bg-surface border border-border-accent p-4 rounded shadow-sm flex items-center justify-between">
+    <div 
+      className="bg-surface border border-border-accent p-4 rounded shadow-sm flex items-center justify-between cursor-pointer hover:border-accent transition-colors"
+      onClick={onClick}
+    >
       <div className="flex items-center gap-3">
-         <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`} className="w-10 h-10 rounded-full" alt="avatar" />
+         <img src={user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}`} className="w-10 h-10 rounded-full bg-white" alt="avatar" />
          <div>
             <p className="font-bold text-sm text-ink">{user.displayName}</p>
          </div>
@@ -265,6 +380,120 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
            {isFollowing ? 'Volg Klaar' : 'Volg'}
          </button>
       </div>
+    </div>
+  );
+}
+
+function OtherUserProfileView({ userId, currentUser, onBack }: { userId: string, currentUser: any, onBack: () => void }) {
+  const [profile, setProfile] = useState<any>(null);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'users', userId), (docSnap) => {
+       if (docSnap.exists()) {
+          setProfile({ id: docSnap.id, ...docSnap.data() });
+       }
+    });
+
+    const checkFollowing = async () => {
+      const docRef = doc(db, `users/${currentUser.id}/following/${userId}`);
+      const docSnap = await getDoc(docRef);
+      setIsFollowing(docSnap.exists());
+    };
+    checkFollowing();
+
+    return () => unsub();
+  }, [userId, currentUser.id]);
+
+  const toggleFollow = async () => {
+    try {
+       const followingRef = doc(db, `users/${currentUser.id}/following/${userId}`);
+       const followerRef = doc(db, `users/${userId}/followers/${currentUser.id}`);
+       
+       if (isFollowing) {
+          await deleteDoc(followingRef);
+          await deleteDoc(followerRef);
+          setIsFollowing(false);
+       } else {
+          await setDoc(followingRef, { createdAt: serverTimestamp() });
+          await setDoc(followerRef, { createdAt: serverTimestamp() });
+          setIsFollowing(true);
+       }
+    } catch(err) {
+       handleFirestoreError(err, OperationType.WRITE, 'following');
+    }
+  };
+
+  const startChat = async () => {
+    try {
+      const q = query(collection(db, 'chats'), where('members', 'array-contains', currentUser.id));
+      const snap = await getDocs(q);
+      let existingChat = null;
+      snap.docs.forEach(d => {
+         const data = d.data();
+         if (data.members.includes(userId)) {
+            existingChat = d;
+         }
+      });
+
+      if (!existingChat) {
+         await addDoc(collection(db, 'chats'), {
+            members: [currentUser.id, userId],
+            lastMessage: '',
+            updatedAt: serverTimestamp()
+         });
+      }
+      
+      alert("Gaan na 'Boodskappe' in die kieslys om te gesels.");
+    } catch(err) {
+      handleFirestoreError(err, OperationType.CREATE, 'chats');
+    }
+  };
+
+  if (!profile) return <div className="p-20 text-center">LAAI PROFIEL...</div>;
+
+  return (
+    <div className="max-w-4xl mx-auto w-full px-6 py-12 md:py-16">
+      <button onClick={onBack} className="text-xs font-bold uppercase tracking-widest text-ink/50 hover:text-accent flex items-center gap-1 mb-6">
+         &larr; Terug na My Profiel
+      </button>
+
+      <div className="bg-surface border border-border-accent rounded p-8 shadow-sm mb-8 flex flex-col md:flex-row gap-8 items-start">
+         <img src={profile.photoURL || `https://ui-avatars.com/api/?name=${profile.displayName}`} className="w-24 h-24 rounded-full border border-border-accent bg-white" alt="avatar" />
+         
+         <div className="flex-1">
+            <h2 className="text-2xl font-bold">{profile.displayName}</h2>
+            <div className="flex gap-4 mb-6 mt-2 text-sm font-bold">
+               <div className="flex items-center gap-1.5"><Users size={16} className="text-accent"/> {profile.followersCount || 0} Volgelinge</div>
+               <div className="text-ink/40">•</div>
+               <div>{profile.followingCount || 0} Volgend</div>
+            </div>
+
+            <div>
+               <p className="text-ink/80 text-sm leading-relaxed max-w-lg whitespace-pre-wrap">{profile.bio || "Geen addisionele inligting beskikbaar nie."}</p>
+            </div>
+         </div>
+         
+         <div className="md:ml-auto flex flex-col gap-2">
+            <button 
+              onClick={startChat}
+              className="px-4 py-2 text-[11px] uppercase font-bold tracking-widest rounded bg-bg text-ink border border-border-accent hover:border-accent text-center"
+            >
+              Gesels
+            </button>
+            <button 
+              onClick={toggleFollow}
+              className={`px-4 py-2 text-[11px] uppercase font-bold tracking-widest rounded transition-all text-center ${isFollowing ? 'bg-bg text-ink/70 border border-border-accent' : 'bg-ink text-ink-inverse hover:opacity-90'}`}
+            >
+              {isFollowing ? 'Volg Klaar' : 'Volg'}
+            </button>
+         </div>
+      </div>
+      
+      <div className="mt-8 mb-12">
+         <ProfileBadges badges={profile.badges || []} />
+      </div>
+
     </div>
   );
 }
