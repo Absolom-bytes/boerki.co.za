@@ -78,7 +78,7 @@ export function CommunityView() {
         return;
       }
       console.error(e);
-      alert('Teken in het misluk. Probeer asseblief weer.');
+      alert('Teken in met Google het misluk. Om e-pos outentisering te gebruik, gaan na die Profiel blad in the kieslys.');
     }
   };
 

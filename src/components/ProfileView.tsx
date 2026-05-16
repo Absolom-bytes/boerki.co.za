@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { User, signInWithPopup, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, serverTimestamp, onSnapshot, addDoc } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { LogIn, User as UserIcon, LogOut, Check, Users, Award, Star, Zap, ShieldCheck } from 'lucide-react';
@@ -11,6 +11,11 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
   const [bio, setBio] = useState('');
   const [activeTab, setActiveTab] = useState<'profile' | 'followers' | 'following'>('profile');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  
+  // Auth Form State
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
   
   useEffect(() => {
     const unsub = auth.onAuthStateChanged(async (u) => {
@@ -51,7 +56,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
     return () => unsub();
   }, []);
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
      try {
        await signInWithPopup(auth, new GoogleAuthProvider());
      } catch (e: any) {
@@ -59,8 +64,22 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
          return;
        }
        console.error(e);
-       alert('Teken in het misluk. Probeer asseblief weer.');
+       alert('Teken in met Google het misluk. Probeer asseblief weer.');
      }
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+      } else {
+        await createUserWithEmailAndPassword(auth, email, password);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Outentisering misluk: ' + err.message);
+    }
   };
 
   const handleSaveBio = async () => {
@@ -77,12 +96,46 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
 
   if (!user) {
      return (
-       <div className="max-w-4xl mx-auto w-full px-6 py-20 text-center">
-         <UserIcon className="mx-auto text-accent/40 mb-6" size={64}/>
-         <h1 className="font-serif text-4xl font-bold mb-4">My Profiel</h1>
-         <p className="text-ink/60 mb-8 max-w-sm mx-auto">Teken in om jou profiel te bestuur, ander gebruikers te volg, en jou inligting op te dateer.</p>
-         <button onClick={handleLogin} className="bg-ink text-ink-inverse px-8 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md inline-flex items-center gap-2 hover:opacity-90">
-           <LogIn size={16}/> Teken In
+       <div className="max-w-4xl mx-auto w-full px-6 py-20 flex flex-col items-center">
+         <UserIcon className="text-accent/40 mb-6" size={64}/>
+         <h1 className="font-serif text-4xl font-bold mb-4">Welkom By BOERki</h1>
+         <p className="text-ink/60 mb-8 max-w-sm text-center">Teken in om jou profiel te bestuur, ander gebruikers te volg, en jou inligting op te dateer.</p>
+         
+         <form onSubmit={handleEmailAuth} className="w-full max-w-sm flex flex-col gap-4 bg-surface p-6 rounded shadow-sm border border-border-accent mb-6">
+           <h2 className="text-xl font-bold text-center mb-2">{isLogin ? 'Teken In' : 'Skep Rekening'}</h2>
+           <input 
+             type="email" 
+             value={email}
+             onChange={e => setEmail(e.target.value)}
+             placeholder="E-posadres" 
+             className="w-full border border-border-accent bg-bg p-3 text-sm focus:border-accent outline-none rounded"
+             required
+           />
+           <input 
+             type="password" 
+             value={password}
+             onChange={e => setPassword(e.target.value)}
+             placeholder="Wagwoord" 
+             className="w-full border border-border-accent bg-bg p-3 text-sm focus:border-accent outline-none rounded"
+             required
+             minLength={6}
+           />
+           <button type="submit" className="bg-ink text-ink-inverse px-4 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md hover:opacity-90 transition-all">
+             {isLogin ? 'Teken In' : 'Registreer'}
+           </button>
+           <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-xs text-ink/60 hover:text-accent mt-2">
+             {isLogin ? 'Skep liewer \'n nuwe rekening' : 'Het jy reeds \'n rekening? Teken in'}
+           </button>
+         </form>
+
+         <div className="flex items-center gap-4 w-full max-w-sm mb-6">
+           <div className="h-px bg-border-accent flex-1"></div>
+           <span className="text-xs font-bold text-ink/40 uppercase tracking-widest">OF</span>
+           <div className="h-px bg-border-accent flex-1"></div>
+         </div>
+
+         <button onClick={handleGoogleLogin} className="w-full max-w-sm bg-surface border border-border-accent text-ink px-8 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-sm inline-flex items-center justify-center gap-2 hover:bg-bg transition-colors">
+           <LogIn size={16}/> Teken In Met Google
          </button>
        </div>
      );
