@@ -1,7 +1,20 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
+
+// Configuration designed for direct deployment to Cloudflare Pages or Firebase Hosting
+// Uses environment variables with a fallback to the original values.
+// In CI/CD, set these VITE_FIREBASE_* variables to your Firebase project config.
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCecNtj1aNufuVtwJXlMp8M7vcB4SyE2eM",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0070677805.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "gen-lang-client-0070677805",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "gen-lang-client-0070677805.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "781534658370",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:781534658370:web:4ae4d266594a83c0f4d2db",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
+  firestoreDatabaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || "ai-studio-6c61cd68-0956-43b5-84d8-2ebc19f5871b"
+};
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); // Use specified DB

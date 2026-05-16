@@ -72,13 +72,47 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
     e.preventDefault();
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (err: any) {
+          if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+            const confirmSignup = window.confirm("Onbekende e-posadres of wagwoord. Wil jy 'n nuwe rekening skep met skep met hierdie inligting?");
+            if (confirmSignup) {
+               await createUserWithEmailAndPassword(auth, email, password);
+            }
+          } else {
+             throw err;
+          }
+        }
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err: any) {
+          if (err.code === 'auth/email-already-in-use') {
+            const confirmLogin = window.confirm("Hierdie e-posadres is reeds geregistreer. Wil jy daarmee inteken?");
+            if (confirmLogin) {
+               await signInWithEmailAndPassword(auth, email, password);
+            }
+          } else {
+             throw err;
+          }
+        }
       }
     } catch (err: any) {
       console.error(err);
-      alert('Outentisering misluk: ' + err.message);
+      if (err.code === 'auth/email-already-in-use') {
+        alert("E-posadres is reeds geregistreer. Kies 'n ander een of teken in.");
+      } else if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        alert('Verkeerde wagwoord of e-posadres. Probeer asseblief weer.');
+      } else if (err.code === 'auth/too-many-requests') {
+        alert('Te veel pogings. Probeer asseblief later weer.');
+      } else if (err.code === 'auth/weak-password') {
+        alert("Die wagwoord is te swak. Kies asseblief 'n sterker wagwoord (gewoonlik 6 of meer karakters).");
+      } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+        return;
+      } else {
+        alert('Outentisering misluk: ' + (err.message || 'Onbekende fout'));
+      }
     }
   };
 
