@@ -28,7 +28,9 @@ import {
   Building,
   MonitorSmartphone,
   ExternalLink,
-  User
+  User,
+  Moon,
+  Sun
 } from "lucide-react";
 
 type View = 
@@ -50,6 +52,25 @@ type View =
 export default function App() {
   const [currentView, setCurrentView] = useState<View>("tuis");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Check initial dark mode state directly from document root
+    setIsDarkMode(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const html = document.documentElement;
+    if (html.classList.contains("dark")) {
+      html.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+      setIsDarkMode(false);
+    } else {
+      html.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+      setIsDarkMode(true);
+    }
+  };
 
   // Close menu when navigating
   const navigate = (view: View) => {
@@ -59,22 +80,54 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent selection:text-white flex flex-col items-center w-full">
+    <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent selection:text-white flex flex-col items-center w-full transition-colors duration-200">
       
       {/* Top Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-sidebar border-b border-sidebar-hover flex items-center justify-between px-6 md:px-12 z-50 transition-all">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-header-bg border-b border-sidebar-hover flex items-center justify-between px-6 md:px-12 z-50 transition-colors duration-200">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("tuis")}>
           <BookOpen className="text-accent" size={26} strokeWidth={2.5} />
           <span className="font-serif font-bold text-3xl tracking-tight text-white">BOERki</span>
         </div>
         
-        <button 
-          onClick={() => setIsSidebarOpen(true)}
-          className="text-white hover:text-accent transition-colors p-2"
-          aria-label="Maak kieslys oop"
-        >
-          <Menu size={28} />
-        </button>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+          <button onClick={() => navigate("tuis")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'tuis' ? 'text-white' : 'text-white/60 hover:text-white'}`}>TUIS</button>
+          
+          <div className="relative group p-4 -m-4">
+            <button onClick={() => navigate("gebruiksgevalle")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors flex items-center gap-1 ${['gebruiksgevalle','tuisskool','skole','korporatief','ed-tegnologie'].includes(currentView) ? 'text-white' : 'text-white/60 hover:text-white'}`}>
+              GEBRUIKSGEVALLE <ChevronRight size={12} className="rotate-90" />
+            </button>
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-0 pt-2 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all z-[60]">
+               <div className="bg-surface text-ink border border-border-accent rounded-lg shadow-xl flex flex-col w-64 items-start p-2">
+                 <button onClick={() => navigate("tuisskool")} className="w-full text-left px-4 py-2 hover:bg-bg rounded-md text-sm font-medium">Tuisskool Ouer Oplossing</button>
+                 <button onClick={() => navigate("skole")} className="w-full text-left px-4 py-2 hover:bg-bg rounded-md text-sm font-medium">Skole Integrasie</button>
+                 <button onClick={() => navigate("korporatief")} className="w-full text-left px-4 py-2 hover:bg-bg rounded-md text-sm font-medium">Korporatiewe KMI</button>
+                 <button onClick={() => navigate("ed-tegnologie")} className="w-full text-left px-4 py-2 hover:bg-bg rounded-md text-sm font-medium">Ed-tegnologie</button>
+               </div>
+            </div>
+          </div>
+
+          <button onClick={() => navigate("profiel")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'profiel' ? 'text-white' : 'text-white/60 hover:text-white'}`}>TEKEN IN</button>
+          <button onClick={() => navigate("kontak")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'kontak' ? 'text-white' : 'text-white/60 hover:text-white'}`}>CONTACT</button>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <button
+            onClick={toggleDarkMode}
+            className="text-white/70 hover:text-white transition-colors p-2 rounded-full hover:bg-white/10"
+            aria-label="Toggle Dark Mode"
+          >
+            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="text-white hover:text-accent transition-colors p-2 md:hidden"
+            aria-label="Maak kieslys oop"
+          >
+            <Menu size={28} />
+          </button>
+        </div>
       </header>
 
       {/* Slide-out Sidebar Overlay */}
@@ -131,7 +184,7 @@ export default function App() {
                   <div className="mt-8 px-4">
                     <button 
                       onClick={() => navigate("witpapiere")}
-                      className="w-full flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white rounded px-4 py-4 text-[11px] font-bold uppercase tracking-widest transition-colors shadow-lg"
+                      className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-white/90 rounded px-4 py-4 text-[11px] font-bold uppercase tracking-widest transition-colors shadow-lg"
                     >
                       <Download size={16} />
                       Die 4 Witpapiere
@@ -174,18 +227,55 @@ export default function App() {
 
       {/* Shared Footer */}
       <footer className="w-full bg-surface border-t border-border-accent py-12 px-6 md:px-12 mt-auto">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-3">
-            <BookOpen className="text-accent/50" size={24} />
-            <span className="font-serif font-bold text-lg text-ink/70">BOERki</span>
-          </div>
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <BookOpen className="text-accent" size={24} />
+                <span className="font-serif font-bold text-lg text-ink">BOERki</span>
+              </div>
+              <p className="text-ink/60 text-sm leading-relaxed mb-6">
+                 Geïntegreerde Landbou Opleiding vir 'n Veranderende SA.
+              </p>
+            </div>
+            
+            <div>
+                <h4 className="font-bold text-sm tracking-widest uppercase mb-6 text-ink/40">Gebruiksgevalle</h4>
+                <ul className="space-y-3 text-sm text-ink/70">
+                    <li><button onClick={() => navigate("tuisskool")} className="hover:text-ink transition-colors">Tuisskool Ouer Oplossing</button></li>
+                    <li><button onClick={() => navigate("skole")} className="hover:text-ink transition-colors">Skole Integrasie</button></li>
+                    <li><button onClick={() => navigate("korporatief")} className="hover:text-ink transition-colors">Korporatiewe KMI</button></li>
+                    <li><button onClick={() => navigate("ed-tegnologie")} className="hover:text-ink transition-colors">Ed-tegnologie</button></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 className="font-bold text-sm tracking-widest uppercase mb-6 text-ink/40">Hulpbronne</h4>
+                <ul className="space-y-3 text-sm text-ink/70">
+                    <li><button onClick={() => navigate("opleiding")} className="hover:text-ink transition-colors">Opleiding & Ontwikkeling</button></li>
+                    <li><button onClick={() => navigate("navorsing")} className="hover:text-ink transition-colors">Navorsing</button></li>
+                    <li><button onClick={() => navigate("witpapiere")} className="hover:text-ink transition-colors">Witpapiere</button></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 className="font-bold text-sm tracking-widest uppercase mb-6 text-ink/40">Gemeenskap</h4>
+                <ul className="space-y-3 text-sm text-ink/70">
+                    <li><button onClick={() => navigate("gemeenskap")} className="hover:text-ink transition-colors">Forum</button></li>
+                    <li><button onClick={() => navigate("profiel")} className="hover:text-ink transition-colors">Teken In / Profiel</button></li>
+                    <li><button onClick={() => navigate("kontak")} className="hover:text-ink transition-colors">Kontak Ons</button></li>
+                </ul>
+            </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 pt-8 border-t border-border-accent">
+          <div className="text-ink/40 text-sm">© {new Date().getFullYear()} BOERki. Alle regte voorbehou.</div>
           <div className="flex items-center gap-4 text-sm font-medium">
             <span className="text-ink/50">Vennote / Partners:</span>
             <a 
               href="https://everyspark.cc/" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-accent hover:text-accent-muted transition-colors bg-accent/5 px-3 py-1.5 rounded"
+              className="flex items-center gap-1.5 text-surface bg-ink hover:opacity-90 transition-opacity px-3 py-1.5 rounded"
             >
               everySPARK <ExternalLink size={14} />
             </a>
@@ -222,41 +312,45 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="w-full px-6 pt-12 pb-16 md:pt-20 md:pb-24 max-w-4xl mx-auto flex flex-col items-start gap-8">
-        <div className="w-full space-y-6">
-          <span className="text-accent uppercase tracking-[0.2em] text-[10px] font-bold block mb-2">
+      <section className="w-full px-6 py-28 md:py-40 flex flex-col items-center text-center">
+        <div className="max-w-4xl mx-auto flex flex-col items-center">
+          <div className="border border-accent/20 bg-accent/5 text-accent px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-8 flex items-center gap-2 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
             Kweetige Intelligensie
-          </span>
-          <h1 className="font-serif text-xl md:text-2xl font-bold text-ink tracking-tight leading-snug">
-            Geïntegreerde Landbou Opleiding <br className="hidden lg:block"/> vir 'n Veranderende SA.
+          </div>
+          
+          <h1 className="font-serif text-5xl md:text-7xl font-bold text-ink tracking-tight leading-[1.1] mb-8">
+            Geïntegreerde Landbou<br className="hidden md:block"/> Opleiding vir 'n <span className="text-accent blur-[0.2px]">Veranderende SA.</span>
           </h1>
-          <p className="text-base md:text-lg text-ink/70 leading-relaxed font-light max-w-2xl">
+          
+          <p className="text-lg md:text-xl text-ink/70 leading-relaxed max-w-2xl font-light mb-12">
             BOERki is nie net 'n toepassing nie—dit is 'n fundamentele herontwerp van hoe 
             Tegnies-Beroeps en Tegnies-Okkuperende vakke aangebied word in landelike Suid-Afrikaanse skole
             met beperkte infrastruktuur.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
             <button 
               onClick={() => navigate("witpapiere")}
-              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2"
+              className="bg-ink hover:bg-ink/90 text-surface w-full sm:w-auto px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest transition-transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
             >
-              <Download size={16} />
-              Laai Die Witpapiere Af
+              Laai Witpapiere Af
             </button>
             <button 
               onClick={() => navigate("gebruiksgevalle")}
-              className="bg-surface border border-border-accent hover:border-accent hover:text-accent text-ink px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+              className="bg-transparent border border-ink/20 hover:border-ink hover:bg-ink/5 text-ink w-full sm:w-auto px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all flex items-center justify-center gap-2"
             >
-              Verken Gebruiksgevalle <ArrowRight size={16} />
+              Verken Gebruiksgevalle
             </button>
           </div>
         </div>
       </section>
 
       {/* Overview Block replacing old "Zero Resistansie" block */}
-      <section className="w-full bg-surface border-y border-border-accent py-20 px-6">
-        <div className="max-w-6xl mx-auto">
+      <section className="w-full bg-surface border-y border-border-accent py-24 px-6 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-block border border-ink/10 bg-bg px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase mb-6 text-ink/60">Die Bloudruk</div>
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-ink mb-6">Die Volledige Argitektuur</h2>
             <p className="text-lg text-ink/70 leading-relaxed font-light">
               Ontdek die metodologie wat ons platform se bevoegdheidsgebaseerde (CBE) en CAPS-belynde enjin dryf, asook die fundamentele raamwerke wat landbou-onderwys herdefinieer.
@@ -264,25 +358,35 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-bg p-10 border border-border-accent rounded shadow-sm hover:border-accent transition-colors flex flex-col items-start group">
-              <BookOpen className="text-accent mb-6" size={32} strokeWidth={1.5} />
+            <div className="bg-bg p-10 border border-border-accent rounded-xl shadow-sm hover:border-accent/60 transition-colors flex flex-col items-start group">
+              <div className="bg-surface p-4 rounded-full border border-border-accent mb-8 shadow-sm">
+                 <BookOpen className="text-accent" size={28} strokeWidth={1.5} />
+              </div>
               <h3 className="text-2xl font-bold mb-4 text-ink">Die 4 Kernraamwerke</h3>
               <p className="text-ink/70 text-base leading-relaxed mb-8 flex-1">
                 Lees meer oor die fundamentele witpapiere wat BOERki se argitektuur dryf. Ons kombineer tegniese innovasie met tasbare pedagogiese metodes.
               </p>
-              <button onClick={() => navigate("witpapiere")} className="text-accent text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all mt-auto py-2 bg-accent/5 px-4 rounded">
-                Verken Witpapiere <ArrowRight size={14} />
+              <button 
+                onClick={() => navigate("witpapiere")} 
+                className="text-ink text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:text-accent transition-colors mt-auto"
+              >
+                Verken Witpapiere <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
             
-            <div className="bg-bg p-10 border border-border-accent rounded shadow-sm hover:border-accent transition-colors flex flex-col items-start group">
-              <Target className="text-accent mb-6" size={32} strokeWidth={1.5} />
+            <div className="bg-bg p-10 border border-border-accent rounded-xl shadow-sm hover:border-accent/60 transition-colors flex flex-col items-start group">
+              <div className="bg-surface p-4 rounded-full border border-border-accent mb-8 shadow-sm">
+                 <Target className="text-accent" size={28} strokeWidth={1.5} />
+              </div>
               <h3 className="text-2xl font-bold mb-4 text-ink">Veelsydige Gebruike</h3>
               <p className="text-ink/70 text-base leading-relaxed mb-8 flex-1">
                 Meer as net 'n portaal vir skole. Ons oplossing skaleer vanaf individuele tuisskool ouers tot by nasionale korporatiewe KMI-inisiatiewe.
               </p>
-              <button onClick={() => navigate("gebruiksgevalle")} className="text-accent text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all mt-auto py-2 bg-accent/5 px-4 rounded">
-                Sien Gebruiksgevalle <ArrowRight size={14} />
+              <button 
+                onClick={() => navigate("gebruiksgevalle")} 
+                className="text-ink text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 group-hover:text-accent transition-colors mt-auto"
+              >
+                Sien Gebruiksgevalle <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -303,7 +407,7 @@ function LandingPage({ navigate }: { navigate: (v: View) => void }) {
             </p>
             <button 
               onClick={() => navigate("witpapiere")} 
-              className="bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all hover:-translate-y-1 shadow-lg flex items-center gap-3 w-fit"
+              className="bg-white hover:bg-white/90 text-black px-8 py-4 rounded text-[11px] font-bold uppercase tracking-widest transition-all hover:-translate-y-1 shadow-lg flex items-center gap-3 w-fit"
             >
               <Download size={18} />
               Gaan na Aflaaiportaal
@@ -411,7 +515,7 @@ function WhitepapersView({ navigate }: { navigate: (v: View) => void }) {
                 <input type="email" className="w-full bg-sidebar-hover border border-sidebar-ink/10 rounded px-4 py-3.5 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-all placeholder:text-white/20 text-white" placeholder="jou.epos@skool.co.za" />
               </div>
 
-              <button type="button" className="w-full bg-accent text-white font-bold text-[11px] uppercase tracking-widest px-4 py-4 rounded hover:bg-accent/90 transition-all hover:-translate-y-0.5 shadow-md mt-6 flex items-center justify-center gap-2">
+              <button type="button" className="w-full bg-white text-black font-bold text-[11px] uppercase tracking-widest px-4 py-4 rounded hover:bg-white/90 transition-all hover:-translate-y-0.5 shadow-md mt-6 flex items-center justify-center gap-2">
                 <Download size={16} />
                 Stuur na E-pos
               </button>

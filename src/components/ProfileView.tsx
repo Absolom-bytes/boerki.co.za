@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, serverTimestamp, onSnapshot, addDoc } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { LogIn, User as UserIcon, LogOut, Check, Users } from 'lucide-react';
+import { LogIn, User as UserIcon, LogOut, Check, Users, Award, Star, Zap, ShieldCheck } from 'lucide-react';
 
 export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
   const [user, setUser] = useState<User | null>(null);
@@ -57,7 +57,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
          <UserIcon className="mx-auto text-accent/40 mb-6" size={64}/>
          <h1 className="font-serif text-4xl font-bold mb-4">My Profiel</h1>
          <p className="text-ink/60 mb-8 max-w-sm mx-auto">Teken in om jou profiel te bestuur, ander gebruikers te volg, en jou inligting op te dateer.</p>
-         <button onClick={handleLogin} className="bg-accent text-white px-8 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md inline-flex items-center gap-2">
+         <button onClick={handleLogin} className="bg-ink text-surface px-8 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md inline-flex items-center gap-2 hover:opacity-90">
            <LogIn size={16}/> Teken In
          </button>
        </div>
@@ -93,7 +93,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
                    placeholder="Vertel ons oor jouself..."
                  />
                  <div className="flex gap-2">
-                   <button onClick={handleSaveBio} className="bg-accent text-white text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded">Stoor</button>
+                   <button onClick={handleSaveBio} className="bg-ink text-surface text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded hover:opacity-90">Stoor</button>
                    <button onClick={() => setEditing(false)} className="text-ink/60 text-[10px] font-bold uppercase tracking-widest px-4 py-2">Kanselleer</button>
                  </div>
                </div>
@@ -112,12 +112,52 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
          </div>
       </div>
       
+      {/* Badges Section */}
+      <div className="mt-8 mb-12">
+         <ProfileBadges badges={profile.badges || []} />
+      </div>
+
       {/* Directory of all users to follow */}
       <div className="mt-12">
         <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Ontdek Ander Gebruikers</h3>
         <UserDirectory currentUser={profile} />
       </div>
 
+    </div>
+  );
+}
+
+function ProfileBadges({ badges }: { badges: string[] }) {
+  // A mock list of possible achievements to gamify engagement
+  const possibleBadges = [
+    { id: 'pioneer', name: 'Pionier', desc: 'Een van die eerste BOERki lede', icon: <Star size={20} className="text-yellow-500" />, color: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-700' },
+    { id: 'contributor', name: 'Bydraer', desc: 'Het bygedra tot die gemeenskap', icon: <Award size={20} className="text-blue-500" />, color: 'bg-blue-500/10 border-blue-500/20 text-blue-700' },
+    { id: 'mentor', name: 'Mentor', desc: 'Help ander op die platform', icon: <ShieldCheck size={20} className="text-green-500" />, color: 'bg-green-500/10 border-green-500/20 text-green-700' },
+    { id: 'active', name: 'Aktief', desc: 'Bly deurlopend betrokke', icon: <Zap size={20} className="text-orange-500" />, color: 'bg-orange-500/10 border-orange-500/20 text-orange-700' }
+  ];
+
+  // For demo: if user has no badges, we give them Pioneer and Active automatically
+  const activeBadges = badges.length > 0 
+    ? possibleBadges.filter(b => badges.includes(b.id)) 
+    : [possibleBadges[0], possibleBadges[3]];
+
+  return (
+    <div className="bg-surface border border-border-accent rounded p-8 shadow-sm">
+      <div className="flex items-center gap-2 mb-6">
+        <Award className="text-accent" size={24} />
+        <h3 className="font-serif text-2xl font-bold text-ink">Prestasies & Kentekens</h3>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {activeBadges.map(badge => (
+          <div key={badge.id} className={`flex flex-col items-center text-center p-4 rounded-xl border ${badge.color}`}>
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+              {badge.icon}
+            </div>
+            <h4 className="font-bold text-sm mb-1">{badge.name}</h4>
+            <p className="text-[10px] uppercase tracking-widest font-bold opacity-70">{badge.desc}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -220,7 +260,7 @@ function UserCard({ user, currentUser }: { user: any, currentUser: any }) {
          </button>
          <button 
            onClick={toggleFollow}
-           className={`px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded ${isFollowing ? 'bg-bg text-ink/70 border border-border-accent' : 'bg-accent text-white'}`}
+           className={`px-3 py-1.5 text-[10px] uppercase font-bold tracking-widest rounded transition-all ${isFollowing ? 'bg-bg text-ink/70 border border-border-accent' : 'bg-ink text-surface hover:opacity-90'}`}
          >
            {isFollowing ? 'Volg Klaar' : 'Volg'}
          </button>

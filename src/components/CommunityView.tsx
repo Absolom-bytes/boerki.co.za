@@ -144,7 +144,7 @@ export function CommunityView() {
         ) : (
           <button 
             onClick={handleLogin}
-            className="bg-accent text-white px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-md hover:-translate-y-0.5 transition-all"
+            className="bg-ink text-surface px-6 py-3 rounded text-[11px] font-bold uppercase tracking-widest flex items-center gap-2 shadow-md hover:-translate-y-0.5 transition-all hover:opacity-90"
           >
             <LogIn size={16}/> TEKEN IN OM DEEL TE NEEM
           </button>
@@ -158,7 +158,7 @@ export function CommunityView() {
           <div className="flex justify-between items-center mb-4">
              <h3 className="font-bold text-sm tracking-widest text-ink/50 uppercase">Takkies (Forums)</h3>
              {user && (
-               <button onClick={() => setShowNewBranchForm(!showNewBranchForm)} className="text-accent hover:text-accent/80 p-1 bg-accent/5 rounded">
+               <button onClick={() => setShowNewBranchForm(!showNewBranchForm)} className="text-ink hover:text-ink/80 p-1 bg-ink/5 rounded">
                  <Plus size={16}/>
                </button>
              )}
@@ -205,7 +205,7 @@ export function CommunityView() {
                      <label className="block text-[10px] uppercase font-bold text-ink/60 mb-1">Beskrywing</label>
                      <textarea name="description" required rows={3} className="w-full border border-border-accent bg-bg p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="Doel of fokus van hierdie tak..." />
                    </div>
-                   <button className="bg-accent text-white px-4 py-2 font-bold text-[11px] uppercase tracking-widest rounded" type="submit">SKEP</button>
+                   <button className="bg-ink text-surface px-4 py-2 font-bold text-[11px] uppercase tracking-widest rounded hover:opacity-90" type="submit">SKEP</button>
                  </form>
                </div>
             ) : activeBranch ? (
@@ -303,7 +303,7 @@ function BranchThreadsView({ branch, user }: { branch: any, user: User | null })
              <input name="title" required className="w-full bg-bg border border-border-accent p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none font-bold" placeholder="Titel van gesprek..." />
              <textarea name="content" required rows={4} className="w-full bg-bg border border-border-accent p-3 text-sm focus:border-accent focus:ring-1 focus:ring-accent outline-none" placeholder="Wat is op jou gedagtes?" />
              <div className="flex gap-2">
-               <button type="submit" className="bg-accent text-white font-bold text-[11px] uppercase px-4 py-2 rounded">Plaas</button>
+               <button type="submit" className="bg-ink text-surface font-bold text-[11px] uppercase px-4 py-2 rounded hover:opacity-90">Plaas</button>
                <button type="button" onClick={() => setShowNewThread(false)} className="text-ink/60 font-bold text-[11px] uppercase hover:text-ink/90 px-4 py-2">Kanselleer</button>
              </div>
            </form>
@@ -409,7 +409,7 @@ function ThreadCommentsView({ branchId, thread, user, onBack }: { branchId: stri
                placeholder="Lewe kommentaar..."
              />
              <div className="self-end">
-               <button className="bg-accent text-white px-6 py-2 text-[11px] font-bold uppercase tracking-widest rounded shadow-sm hover:-translate-y-0.5 transition-all">Plaas Antwoord</button>
+               <button className="bg-ink text-surface px-6 py-2 text-[11px] font-bold uppercase tracking-widest rounded shadow-sm hover:-translate-y-0.5 transition-all hover:opacity-90">Plaas Antwoord</button>
              </div>
            </form>
          ) : (

@@ -102,7 +102,7 @@ export function ContactView() {
              <button 
                type="submit" 
                disabled={isSubmitting}
-               className="w-full bg-accent text-white font-bold text-[11px] uppercase tracking-widest px-4 py-4 rounded hover:bg-accent/90 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+               className="w-full bg-ink text-surface font-bold text-[11px] uppercase tracking-widest px-4 py-4 rounded hover:bg-ink/90 transition-all shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
              >
                {isSubmitting ? (
                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>

@@ -6,7 +6,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <title>Elegant Dark App</title>
+    <title>BOERki</title>
+    <script>
+      (function() {
+        try {
+          var currentTheme = localStorage.getItem('theme');
+          var sysTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (currentTheme === 'dark' || (!currentTheme && sysTheme)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
