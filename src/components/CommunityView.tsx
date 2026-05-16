@@ -13,7 +13,7 @@ import {
   getDoc
 } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { MessageSquare, LogIn, Plus, Users, UserRead, Key, LogOut } from 'lucide-react';
+import { MessageSquare, LogIn, Plus, Users, Key, LogOut } from 'lucide-react';
 
 export function CommunityView() {
   const [user, setUser] = useState<User | null>(null);

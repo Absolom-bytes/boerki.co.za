@@ -28,7 +28,7 @@ export function ChatView() {
     const unsub = onSnapshot(q, async (snapshot) => {
        // Resolve member details
        const chatDocs = await Promise.all(snapshot.docs.map(async (d) => {
-          const data = d.data();
+          const data = d.data() as any;
           const otherUserId = data.members.find((m: string) => m !== user.uid);
           let otherUser = { displayName: 'Unknown', photoURL: '' };
           if (otherUserId) {

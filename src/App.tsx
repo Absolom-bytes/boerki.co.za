@@ -4,6 +4,10 @@ import { ContactView } from "./components/ContactView";
 import { CommunityView } from "./components/CommunityView";
 import { ProfileView } from "./components/ProfileView";
 import { ChatView } from "./components/ChatView";
+import { AdminDashboard } from "./components/AdminDashboard";
+import { auth, db } from "./lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import { signOut } from "firebase/auth";
 import { 
   BookOpen, 
   Menu,
@@ -47,16 +51,38 @@ type View =
   | "gemeenskap"
   | "witpapiere"
   | "profiel"
+  | "admin"
   | "boodskappe";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>("tuis");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLimbo, setIsLimbo] = useState(false);
 
   useEffect(() => {
     // Check initial dark mode state directly from document root
     setIsDarkMode(document.documentElement.classList.contains("dark"));
+
+    const unsubAuth = auth.onAuthStateChanged((user) => {
+      if (user) {
+        const unsubDoc = onSnapshot(doc(db, "users", user.uid), (snap) => {
+          if (snap.exists()) {
+             const data = snap.data();
+             if (data.status === "limbo" || data.status === "suspended") {
+                setIsLimbo(true);
+             } else {
+                setIsLimbo(false);
+             }
+          }
+        }, err => console.error(err));
+        return () => unsubDoc();
+      } else {
+        setIsLimbo(false);
+      }
+    });
+
+    return () => unsubAuth();
   }, []);
 
   const toggleDarkMode = () => {
@@ -78,6 +104,17 @@ export default function App() {
     setIsSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (isLimbo) {
+    return (
+      <div className="min-h-screen bg-bg text-ink font-sans flex flex-col items-center justify-center p-6 text-center">
+        <Shield size={64} className="text-purple-600 mb-6" />
+        <h1 className="font-serif text-3xl font-bold mb-4">Toegang Opgeskort (Limbo)</h1>
+        <p className="text-ink/70 max-w-md mx-auto mb-8">Jou rekening is tans in onderhoud of gereserveer vir verdere ondersoek (Limbo status). Jy kan nie tans die stelsel gebruik nie. Kontak asseblief met admin@boerki.co.za vir meer inligting.</p>
+        <button onClick={() => signOut(auth)} className="bg-ink text-ink-inverse px-6 py-2 text-sm font-bold uppercase tracking-widest hover:opacity-90 transition-opacity">Teken Uit</button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent selection:text-white flex flex-col items-center w-full transition-colors duration-200">
@@ -107,7 +144,7 @@ export default function App() {
             </div>
           </div>
 
-          <button onClick={() => navigate("profiel")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'profiel' ? 'text-white' : 'text-white/60 hover:text-white'}`}>TEKEN IN</button>
+          <button onClick={() => navigate("profiel")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'profiel' ? 'text-white' : 'text-white/60 hover:text-white'}`}>PROFIEL</button>
           <button onClick={() => navigate("kontak")} className={`text-[11px] font-bold uppercase tracking-widest transition-colors ${currentView === 'kontak' ? 'text-white' : 'text-white/60 hover:text-white'}`}>CONTACT</button>
         </div>
 
@@ -180,6 +217,7 @@ export default function App() {
                   <SidebarItem icon={<MessageSquare size={18} />} label="Gemeenskap" isActive={currentView === "gemeenskap"} onClick={() => navigate("gemeenskap")} />
                   <SidebarItem icon={<User size={18} />} label="My Profiel" isActive={currentView === "profiel"} onClick={() => navigate("profiel")} />
                   <SidebarItem icon={<MessageSquare size={18} />} label="Boodskappe" isActive={currentView === "boodskappe"} onClick={() => navigate("boodskappe")} />
+                  <SidebarItem icon={<Shield size={18} />} label="Admin Dashboard" isActive={currentView === "admin"} onClick={() => navigate("admin")} />
                   
                   <div className="mt-8 px-4">
                     <button 
@@ -220,6 +258,7 @@ export default function App() {
             {currentView === "gemeenskap" && <CommunityView />}
             {currentView === "profiel" && <ProfileView navigate={navigate} />}
             {currentView === "boodskappe" && <ChatView />}
+            {currentView === "admin" && <AdminDashboard />}
             {currentView === "witpapiere" && <WhitepapersView navigate={navigate} />}
           </motion.div>
         </AnimatePresence>
@@ -261,7 +300,7 @@ export default function App() {
                 <h4 className="font-bold text-sm tracking-widest uppercase mb-6 text-ink/40">Gemeenskap</h4>
                 <ul className="space-y-3 text-sm text-ink/70">
                     <li><button onClick={() => navigate("gemeenskap")} className="hover:text-ink transition-colors">Forum</button></li>
-                    <li><button onClick={() => navigate("profiel")} className="hover:text-ink transition-colors">Teken In / Profiel</button></li>
+                    <li><button onClick={() => navigate("profiel")} className="hover:text-ink transition-colors">Profiel</button></li>
                     <li><button onClick={() => navigate("kontak")} className="hover:text-ink transition-colors">Kontak Ons</button></li>
                 </ul>
             </div>

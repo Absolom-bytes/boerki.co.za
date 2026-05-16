@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, signInWithPopup, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { User, signInWithPopup, GoogleAuthProvider, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, setPersistence, inMemoryPersistence } from 'firebase/auth';
 import { doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, serverTimestamp, onSnapshot, addDoc } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { LogIn, User as UserIcon, LogOut, Check, Users, Award, Star, Zap, ShieldCheck } from 'lucide-react';
@@ -18,6 +18,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
   const [isLogin, setIsLogin] = useState(true);
   
   useEffect(() => {
+    setPersistence(auth, inMemoryPersistence).catch(console.error);
     const unsub = auth.onAuthStateChanged(async (u) => {
       setUser(u);
       if (u) {
@@ -81,7 +82,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
                await createUserWithEmailAndPassword(auth, email, password);
             }
           } else {
-             throw err;
+             alert('Outentisering misluk: ' + (err.message || 'Onbekende fout'));
           }
         }
       } else {
@@ -94,7 +95,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
                await signInWithEmailAndPassword(auth, email, password);
             }
           } else {
-             throw err;
+             alert('Outentisering misluk: ' + (err.message || 'Onbekende fout'));
           }
         }
       }
@@ -113,6 +114,19 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
       } else {
         alert('Outentisering misluk: ' + (err.message || 'Onbekende fout'));
       }
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!email) {
+      alert("Voer asseblief jou e-posadres in die e-pos blokkie in eers.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Wagwoord herstel e-pos is gestuur! Kyk asseblief in jou inkassie.");
+    } catch (err: any) {
+      alert("Kon nie e-pos stuur nie: " + err.message);
     }
   };
 
@@ -157,6 +171,11 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
            <button type="submit" className="bg-ink text-ink-inverse px-4 py-3 rounded text-[11px] font-bold uppercase tracking-widest shadow-md hover:opacity-90 transition-all">
              {isLogin ? 'Teken In' : 'Registreer'}
            </button>
+           {isLogin && (
+             <button type="button" onClick={handlePasswordReset} className="text-xs text-ink/60 hover:text-accent mt-1">
+               Wagwoord vergeet?
+             </button>
+           )}
            <button type="button" onClick={() => setIsLogin(!isLogin)} className="text-xs text-ink/60 hover:text-accent mt-2">
              {isLogin ? 'Skep liewer \'n nuwe rekening' : 'Het jy reeds \'n rekening? Teken in'}
            </button>
@@ -182,6 +201,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
        <OtherUserProfileView 
          userId={selectedUserId} 
          currentUser={profile} 
+         navigate={navigate}
          onBack={() => setSelectedUserId(null)} 
        />
     );
@@ -262,7 +282,7 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
           </div>
           <div className="mt-12">
             <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Ontdek Ander Gebruikers</h3>
-            <UserDirectory currentUser={profile} mode="discover" onUserClick={setSelectedUserId} />
+            <UserDirectory currentUser={profile} mode="discover" onUserClick={setSelectedUserId} navigate={navigate} />
           </div>
         </>
       )}
@@ -270,14 +290,14 @@ export function ProfileView({ navigate }: { navigate: (v: string) => void }) {
       {activeTab === 'followers' && (
         <div className="mt-8">
           <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Jou Volgelinge</h3>
-          <UserDirectory currentUser={profile} mode="followers" onUserClick={setSelectedUserId} />
+          <UserDirectory currentUser={profile} mode="followers" onUserClick={setSelectedUserId} navigate={navigate} />
         </div>
       )}
 
       {activeTab === 'following' && (
         <div className="mt-8">
           <h3 className="font-serif text-2xl font-bold mb-6 border-b border-border-accent pb-2">Mense wat jy volg</h3>
-          <UserDirectory currentUser={profile} mode="following" onUserClick={setSelectedUserId} />
+          <UserDirectory currentUser={profile} mode="following" onUserClick={setSelectedUserId} navigate={navigate} />
         </div>
       )}
 
@@ -320,7 +340,7 @@ function ProfileBadges({ badges }: { badges: string[] }) {
   );
 }
 
-function UserDirectory({ currentUser, mode, onUserClick }: { currentUser: any, mode: 'discover' | 'followers' | 'following', onUserClick: (id: string) => void }) {
+function UserDirectory({ currentUser, mode, onUserClick, navigate }: { currentUser: any, mode: 'discover' | 'followers' | 'following', onUserClick: (id: string) => void, navigate: (v: string) => void }) {
   const [users, setUsers] = useState<any[]>([]);
 
   useEffect(() => {
@@ -378,13 +398,13 @@ function UserDirectory({ currentUser, mode, onUserClick }: { currentUser: any, m
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
        {users.map(u => (
-          <UserCard key={u.id} user={u} currentUser={currentUser} onClick={() => onUserClick(u.id)} />
+          <UserCard key={u.id} user={u} currentUser={currentUser} onClick={() => onUserClick(u.id)} navigate={navigate} />
        ))}
     </div>
   );
 }
 
-function UserCard({ user, currentUser, onClick }: { user: any, currentUser: any, onClick: () => void }) {
+function UserCard({ user, currentUser, onClick, navigate }: { user: any, currentUser: any, onClick: () => void, navigate: (v: string) => void, key?: React.Key }) {
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
@@ -440,7 +460,7 @@ function UserCard({ user, currentUser, onClick }: { user: any, currentUser: any,
          });
       }
       
-      alert("Gaan na 'Boodskappe' in die kieslys om te gesels.");
+      navigate("boodskappe");
     } catch(err) {
       handleFirestoreError(err, OperationType.CREATE, 'chats');
     }
@@ -475,7 +495,7 @@ function UserCard({ user, currentUser, onClick }: { user: any, currentUser: any,
   );
 }
 
-function OtherUserProfileView({ userId, currentUser, onBack }: { userId: string, currentUser: any, onBack: () => void }) {
+function OtherUserProfileView({ userId, currentUser, onBack, navigate }: { userId: string, currentUser: any, onBack: () => void, navigate: (v: string) => void }) {
   const [profile, setProfile] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -535,7 +555,7 @@ function OtherUserProfileView({ userId, currentUser, onBack }: { userId: string,
          });
       }
       
-      alert("Gaan na 'Boodskappe' in die kieslys om te gesels.");
+      navigate("boodskappe");
     } catch(err) {
       handleFirestoreError(err, OperationType.CREATE, 'chats');
     }

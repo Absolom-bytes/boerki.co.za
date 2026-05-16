@@ -6,6 +6,12 @@ service cloud.firestore {
     }
 
     function isSignedIn() { return request.auth != null; }
+    function isAdmin() { 
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'admin@boerki.co.za'
+      ); 
+    }
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
@@ -18,9 +24,16 @@ service cloud.firestore {
           && data.followersCount is number
           && data.followingCount is number
           && data.get('photoURL', '') is string
-          && data.get('bio', '') is string;
+          && data.get('bio', '') is string
+          && data.get('status', 'active') is string
+          && data.get('warnings', 0) is number;
     }
 
+    match /admins/{adminId} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+    
     match /users/{userId} {
       allow get: if true;
       allow list: if isSignedIn();
@@ -29,13 +42,17 @@ service cloud.firestore {
                     && isValidUser(incoming())
                     && incoming().followersCount == 0
                     && incoming().followingCount == 0;
-      allow update: if isSignedIn() 
-                    && request.auth.uid == userId
+      allow update: if (isSignedIn() && request.auth.uid == userId
                     && (
                       incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'bio'])
                       && incoming().displayName is string && incoming().displayName.size() <= 100
                       && incoming().get('photoURL', existing().get('photoURL', '')) is string
                       && incoming().get('bio', existing().get('bio', '')) is string
+                    )) || (
+                      isAdmin()
+                      && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'warnings', 'displayName', 'bio', 'photoURL'])
+                      && incoming().get('status', 'active') in ['active', 'suspended', 'archived', 'limbo']
+                      && incoming().get('warnings', 0) is number
                     );
     }
     
@@ -66,6 +83,7 @@ service cloud.firestore {
     }
 
     match /contacts/{contactId} {
+      allow read: if isAdmin();
       allow create: if isValidContact(incoming());
       // No read access for public
     }
@@ -139,7 +157,7 @@ service cloud.firestore {
     }
 
     match /chats/{chatId} {
-      allow read: if isSignedIn() && request.auth.uid in resource.data.members;
+      allow read: if isSignedIn() && (request.auth.uid in resource.data.members || isAdmin());
       allow create: if isSignedIn() && isValidChat(incoming());
       allow update: if isSignedIn() && request.auth.uid in existing().members
                     && incoming().diff(existing()).affectedKeys().hasOnly(['lastMessage', 'updatedAt'])
@@ -156,7 +174,7 @@ service cloud.firestore {
     }
 
     match /chats/{chatId}/messages/{messageId} {
-      allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+      allow read: if isSignedIn() && (request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members || isAdmin());
       allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members
                     && isValidChatMessage(incoming());
       allow update: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members

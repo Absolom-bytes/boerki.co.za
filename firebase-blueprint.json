@@ -11,6 +11,8 @@
         "bio": { "type": "string" },
         "followersCount": { "type": "number" },
         "followingCount": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "suspended", "archived", "limbo"] },
+        "warnings": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["email", "displayName", "createdAt"]
